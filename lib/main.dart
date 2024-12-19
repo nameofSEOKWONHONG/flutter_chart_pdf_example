@@ -1,4 +1,6 @@
 import 'package:flu_example/menus/barchart.dart';
+import 'package:flu_example/menus/barchart2.dart';
+import 'package:flu_example/menus/demochart.dart';
 import 'package:flu_example/menus/linechart.dart';
 import 'package:flutter/material.dart';
 
@@ -55,6 +57,28 @@ class MainPage extends StatelessWidget {
               );
             },
             child: Text('Page bar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ApneaBarChart(),
+                ),
+              );
+            },
+            child: Text('Page bar2'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DemoChart(),
+                ),
+              );
+            },
+            child: Text('demo chart'),
           ),
         ],
       ),
