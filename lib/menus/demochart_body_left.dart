@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:flu_example/menus/chart_util.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -31,16 +32,16 @@ class DemoChartBodyLeft {
                             children: [
                               pw.TableRow(
                                 children: [
-                                  _defaultText(pw.Alignment.centerLeft, "수면 시간", 7, pw.FontWeight.bold, font, 0),
-                                  _defaultText(pw.Alignment.center, "취침 시간", 7, pw.FontWeight.bold, font, 0),
-                                  _defaultText(pw.Alignment.centerRight, "기상 시간", 7, pw.FontWeight.bold, font, 0),
+                                  ChartUtil.defaultText(pw.Alignment.centerLeft, "수면 시간", 7, pw.FontWeight.bold, font, 0),
+                                  ChartUtil.defaultText(pw.Alignment.center, "취침 시간", 7, pw.FontWeight.bold, font, 0),
+                                  ChartUtil.defaultText(pw.Alignment.centerRight, "기상 시간", 7, pw.FontWeight.bold, font, 0),
                                 ]
                               ),
                               pw.TableRow(
                                   children: [
-                                    _defaultText(pw.Alignment.centerLeft, "8시간 00분", 10, pw.FontWeight.bold, font, 0),
-                                    _defaultText(pw.Alignment.center, "22:00", 7, pw.FontWeight.bold, font, 0),
-                                    _defaultText(pw.Alignment.centerRight, "06:00", 7, pw.FontWeight.bold, font, 0),
+                                    ChartUtil.defaultText(pw.Alignment.centerLeft, "8시간 00분", 10, pw.FontWeight.bold, font, 0),
+                                    ChartUtil.defaultText(pw.Alignment.center, "22:00", 7, pw.FontWeight.bold, font, 0),
+                                    ChartUtil.defaultText(pw.Alignment.centerRight, "06:00", 7, pw.FontWeight.bold, font, 0),
                                   ]
                               ),
                             ]
@@ -54,7 +55,7 @@ class DemoChartBodyLeft {
                             children: [
                               pw.TableRow(
                                   children: [
-                                    _defaultText(pw.Alignment.center, "수면 단계\r\nSleep Stage", 7, pw.FontWeight.bold, font, 8),
+                                    ChartUtil.defaultText(pw.Alignment.center, "수면 단계\r\nSleep Stage", 7, pw.FontWeight.bold, font, 8),
                                     pw.CustomPaint(
                                         size: const PdfPoint(280, 50),
                                         painter: (canvas, point) {
@@ -143,7 +144,7 @@ class DemoChartBodyLeft {
                                         children: [
                                           pw.TableRow(
                                               children: [
-                                                _defaultText(pw.Alignment.centerLeft, "수면 단계 통계", 7, pw.FontWeight.bold, font, 8),
+                                                ChartUtil.defaultText(pw.Alignment.centerLeft, "수면 단계 통계", 7, pw.FontWeight.bold, font, 8),
                                               ]
                                           ),
                                           pw.TableRow(
@@ -156,30 +157,30 @@ class DemoChartBodyLeft {
                                                     children: [
                                                       pw.TableRow(
                                                           children: [
-                                                            _defaultText(pw.Alignment.centerLeft, "비수면", 7, pw.FontWeight.bold, font, 8),
-                                                            _defaultText(pw.Alignment.centerLeft, "48분", 7, pw.FontWeight.bold, font, 8),
-                                                            _defaultText(pw.Alignment.centerLeft, "10%", 7, pw.FontWeight.bold, font, 8),
+                                                            ChartUtil.defaultText(pw.Alignment.centerLeft, "비수면", 7, pw.FontWeight.bold, font, 8),
+                                                            ChartUtil.defaultText(pw.Alignment.centerLeft, "48분", 7, pw.FontWeight.bold, font, 8),
+                                                            ChartUtil.defaultText(pw.Alignment.centerLeft, "10%", 7, pw.FontWeight.bold, font, 8),
                                                           ]
                                                       ),
                                                       pw.TableRow(
                                                           children: [
-                                                            _defaultText(pw.Alignment.centerLeft, "램(REM) 수면", 7, pw.FontWeight.bold, font, 8),
-                                                            _defaultText(pw.Alignment.centerLeft, "1시간 36분", 7, pw.FontWeight.bold, font, 8),
-                                                            _defaultText(pw.Alignment.centerLeft, "20%", 7, pw.FontWeight.bold, font, 8),
+                                                            ChartUtil.defaultText(pw.Alignment.centerLeft, "램(REM) 수면", 7, pw.FontWeight.bold, font, 8),
+                                                            ChartUtil.defaultText(pw.Alignment.centerLeft, "1시간 36분", 7, pw.FontWeight.bold, font, 8),
+                                                            ChartUtil.defaultText(pw.Alignment.centerLeft, "20%", 7, pw.FontWeight.bold, font, 8),
                                                           ]
                                                       ),
                                                       pw.TableRow(
                                                           children: [
-                                                            _defaultText(pw.Alignment.centerLeft, "얕은 수면", 7, pw.FontWeight.bold, font, 8),
-                                                            _defaultText(pw.Alignment.centerLeft, "3시간 12분", 7, pw.FontWeight.bold, font, 8),
-                                                            _defaultText(pw.Alignment.centerLeft, "40%", 7, pw.FontWeight.bold, font, 8),
+                                                            ChartUtil.defaultText(pw.Alignment.centerLeft, "얕은 수면", 7, pw.FontWeight.bold, font, 8),
+                                                            ChartUtil.defaultText(pw.Alignment.centerLeft, "3시간 12분", 7, pw.FontWeight.bold, font, 8),
+                                                            ChartUtil.defaultText(pw.Alignment.centerLeft, "40%", 7, pw.FontWeight.bold, font, 8),
                                                           ]
                                                       ),
                                                       pw.TableRow(
                                                           children: [
-                                                            _defaultText(pw.Alignment.centerLeft, "깊은 수면", 7, pw.FontWeight.bold, font, 8),
-                                                            _defaultText(pw.Alignment.centerLeft, "2시간 24분", 7, pw.FontWeight.bold, font, 8),
-                                                            _defaultText(pw.Alignment.centerLeft, "30%", 7, pw.FontWeight.bold, font, 8),
+                                                            ChartUtil.defaultText(pw.Alignment.centerLeft, "깊은 수면", 7, pw.FontWeight.bold, font, 8),
+                                                            ChartUtil.defaultText(pw.Alignment.centerLeft, "2시간 24분", 7, pw.FontWeight.bold, font, 8),
+                                                            ChartUtil.defaultText(pw.Alignment.centerLeft, "30%", 7, pw.FontWeight.bold, font, 8),
                                                           ]
                                                       ),
                                                     ]
@@ -195,7 +196,7 @@ class DemoChartBodyLeft {
                         pw.Container(
                             height: 5
                         ),
-                        _defaultText(pw.Alignment.centerLeft, "* 램(REM) 수면은 정신의 피로를 회복하는데 중요한 수면 단계이며, 얕은 수면과 깊은 수면은 신체적인 회복에 필요한 수면 단계입니다.", 6, pw.FontWeight.bold, font, 2),
+                        ChartUtil.defaultText(pw.Alignment.centerLeft, "* 램(REM) 수면은 정신의 피로를 회복하는데 중요한 수면 단계이며, 얕은 수면과 깊은 수면은 신체적인 회복에 필요한 수면 단계입니다.", 6, pw.FontWeight.bold, font, 2),
                       ]
                   )
               )
@@ -204,19 +205,7 @@ class DemoChartBodyLeft {
     );
   }
 
-  pw.Container _defaultText(pw.Alignment alignment, String text, double fontSize, pw.FontWeight weight, pw.Font font, double padding) {
-    return pw.Container(
-        alignment: alignment,
-        padding: pw.EdgeInsets.all(padding),
-        child: pw.Text(text,
-            style: pw.TextStyle(
-                fontSize: fontSize,
-                fontWeight: weight,
-                font: font
-            )
-        )
-    );
-  }
+
 }
 
 class TypeA {
