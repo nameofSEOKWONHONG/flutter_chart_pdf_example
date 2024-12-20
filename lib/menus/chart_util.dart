@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -13,6 +12,32 @@ class ChartUtil {
     return pw.CustomPaint(
         size: const PdfPoint(0, 0),
         painter: (canvas, point) {
+          //region debug
+          // canvas
+          //   ..setColor(PdfColors.red)
+          //   ..drawString(PdfFont.courier(PdfDocument()), 5, "(0,0)", -5, -5)
+          //   ..strokePath();
+          // for(int x=0; x<60; x+=5) {
+          //   for(int y=0; y<55; y+=5) {
+          //     canvas
+          //       ..setColor(PdfColors.grey)
+          //       ..setLineWidth(0.1)
+          //       ..drawLine(x.toDouble(), y.toDouble(), x.toDouble(), y.toDouble() + 5)
+          //       ..strokePath();
+          //   }
+          // }
+          //
+          // for(int x=0; x<55; x+=5) {
+          //   for(int y=0; y<60; y+=5) {
+          //     canvas
+          //       ..setColor(PdfColors.grey)
+          //       ..setLineWidth(0.1)
+          //       ..drawLine(x.toDouble(), y.toDouble(), x.toDouble() + 5, y.toDouble())
+          //       ..strokePath();
+          //   }
+          // }
+          //endregion
+
           double x1 = 10;
           double x2 = 210;
           double y1 = 40;
@@ -40,7 +65,7 @@ class ChartUtil {
               ..strokePath();
 
             if (currentTime.minute == 0) {
-              canvas.drawString(PdfFont.courier(PdfDocument()), 4, "${currentTime.hour.toString().padLeft(2, "0")}", x1-2, y2 - 5);
+              canvas.drawString(PdfFont.courier(PdfDocument()), 4, currentTime.hour.toString().padLeft(2, "0"), x1-2, y2 - 5);
             }
 
             x1 = x1+3;
@@ -125,7 +150,7 @@ class ChartUtil {
 
           canvas
             ..setStrokeColor(PdfColors.black)
-            ..setLineWidth(0.01)
+            ..setLineWidth(0.1)
             ..moveTo(x1, y1)
             ..lineTo(x2, y1)
             ..strokePath()
@@ -162,7 +187,7 @@ class ChartUtil {
           canvas
             ..setColor(PdfColors.grey)
             ..setLineWidth(0.1)
-            ..drawLine(x1-30, y2 - 15, x2, y2 - 15)
+            ..drawLine(x1-30, y2 - 15.5, x2, y2 - 15.5)
             ..strokePath();
 
           canvas
@@ -180,7 +205,7 @@ class ChartUtil {
               ..strokePath();
 
             if (currentTime.minute == 0) {
-              canvas.drawString(PdfFont.courier(PdfDocument()), 4, "${currentTime.hour.toString().padLeft(2, "0")}", x1-2, y2 - 5);
+              canvas.drawString(PdfFont.courier(PdfDocument()), 4, currentTime.hour.toString().padLeft(2, "0"), x1-2, y2 - 5);
             }
 
             var item = items.where((e) => e.date == currentTime).firstOrNull;
@@ -188,7 +213,7 @@ class ChartUtil {
               double v = normalizeY(item.count, 0, 100, 0, 20);
               canvas
                 ..setColor(color)
-                ..setLineWidth(0.1)
+                ..setLineWidth(1)
                 ..drawLine(x1, (y1 - 40), x1, v)
                 ..strokePath();
             }
@@ -206,9 +231,6 @@ class ChartUtil {
         size: const PdfPoint(0, 0),
         painter: (canvas, point) {
           double x1 = 10;
-          double x2 = 210;
-          double y1 = 40;
-          double y2 = 35;
 
           DateTime startTime = DateTime(
             items[0].date.year,
@@ -239,7 +261,7 @@ class ChartUtil {
 
               var item = items.where((m) => m.date == currentTime).firstOrNull;
               if(item != null) {
-                var y = normalizeY(item.count, 10, 30, 10, 28);
+                var y = normalizeY(item.count, 10, 30, 10, 20);
                 points.add(ValuePoint(x1, y, item.count));
               }
             }
@@ -290,9 +312,6 @@ class ChartUtil {
         size: const PdfPoint(0, 0),
         painter: (canvas, point) {
           double x1 = 10;
-          double x2 = 210;
-          double y1 = 40;
-          double y2 = 35;
 
           DateTime startTime = DateTime(
               items[0].date.year,
@@ -320,7 +339,7 @@ class ChartUtil {
                 currentTime.second == 0) {
               var item = items.where((m) => m.date == currentTime).firstOrNull;
               if(item != null) {
-                var y = normalizeY(item.count, 0, 100, 90, 110);
+                var y = normalizeY(item.count, 90, 100, 0, 10);
                 points.add(ValuePoint(x1, y, item.count));
               }
             }
@@ -336,7 +355,7 @@ class ChartUtil {
               var point = points[i];
               canvas
                 ..setColor(PdfColors.black)
-                ..drawString(font, 4, "${point.v}", point.x - 2, point.y - 8);
+                ..drawString(font, 4, "${point.v.toInt()}", point.x - 2, point.y - 8);
               canvas
                 ..setFillColor(PdfColors.blue)
                 ..setColor(PdfColors.blue)
@@ -350,7 +369,7 @@ class ChartUtil {
             var next = points[i + 1];
             canvas
               ..setColor(PdfColors.black)
-              ..drawString(font, 4, "${current.v}", current.x - 2, current.y -8);
+              ..drawString(font, 4, "${current.v.toInt()}", current.x - 2, current.y -8);
             canvas
               ..setFillColor(PdfColors.blue)
               ..setColor(PdfColors.blue)
@@ -371,9 +390,6 @@ class ChartUtil {
         size: const PdfPoint(0, 0),
         painter: (canvas, point) {
           double x1 = 10;
-          double x2 = 210;
-          double y1 = 40;
-          double y2 = 35;
 
           DateTime startTime = DateTime(
               items[0].date.year,
@@ -401,7 +417,7 @@ class ChartUtil {
                 currentTime.second == 0) {
               var item = items.where((m) => m.date == currentTime).firstOrNull;
               if(item != null) {
-                var y = normalizeY(item.count, 0, 100, 10, 28);
+                var y = normalizeY(item.count, 50, 200, 10, 28);
                 points.add(ValuePoint(x1, y, item.count));
               }
             }
@@ -417,7 +433,7 @@ class ChartUtil {
               var point = points[i];
               canvas
                 ..setColor(PdfColors.black)
-                ..drawString(font, 4, "${point.v}", point.x - 2, point.y - 8);
+                ..drawString(font, 4, "${point.v.toInt()}", point.x - 2, point.y - 8);
               canvas
                 ..setFillColor(PdfColors.blue)
                 ..setColor(PdfColors.blue)
@@ -431,7 +447,7 @@ class ChartUtil {
             var next = points[i + 1];
             canvas
               ..setColor(PdfColors.black)
-              ..drawString(font, 4, "${current.v}", current.x - 2, current.y -8);
+              ..drawString(font, 4, "${current.v.toInt()}", current.x - 2, current.y -8);
             canvas
               ..setFillColor(PdfColors.blue)
               ..setColor(PdfColors.blue)
@@ -452,9 +468,6 @@ class ChartUtil {
         size: const PdfPoint(0, 0),
         painter: (canvas, point) {
           double x1 = 10;
-          double x2 = 210;
-          double y1 = 40;
-          double y2 = 35;
 
           DateTime startTime = DateTime(
               items[0].date.year,
@@ -485,7 +498,7 @@ class ChartUtil {
 
               var item = items.where((m) => m.date == currentTime).firstOrNull;
               if(item != null) {
-                var y = normalizeY(item.count * 1, 30, 40, 30, 40);
+                var y = normalizeY(item.count, 350, 400, 0, 50);
                 points.add(ValuePoint(x1, y, (item.count * 0.1)));
               }
             }

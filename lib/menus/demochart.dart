@@ -1,7 +1,3 @@
-
-import 'dart:math';
-import 'dart:typed_data';
-
 import 'package:flu_example/menus/chart_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,20 +6,21 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import 'chart_model.dart';
-import 'demochart_body_left.dart';
-import 'demochart_header.dart';
 
-
-
-class DemoChart extends StatelessWidget {
+class DemoChart extends StatefulWidget {
   ChartMember member;
   ChartSleepStage sleepStage;
   EventInfo eventInfo;
   TrendInfo trendInfo;
   SleepReview sleepReview;
 
-  DemoChart(this.member, this.sleepStage, this.eventInfo, this.trendInfo, this.sleepReview);
+  DemoChart(this.member, this.sleepStage, this.eventInfo, this.trendInfo, this.sleepReview, {super.key});
 
+  @override
+  State<DemoChart> createState() => _DemoChartState();
+}
+
+class _DemoChartState extends State<DemoChart> {
   Future<pw.Font> loadKoreanFont() async {
     // 폰트 파일 로드
     final fontData = await rootBundle.load('assets/NanumGothic.ttf');
@@ -32,7 +29,6 @@ class DemoChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('demo'),
@@ -46,7 +42,6 @@ class DemoChart extends StatelessWidget {
 
   Future<Uint8List> _makePDF(PdfPageFormat format) async {
     final doc = pw.Document();
-    final Uint8List headerImage = await _loadImageFromAssets('assets/logo.png');
     final font = await loadKoreanFont();
 
     final svgString = await rootBundle.loadString('assets/report.svg');
@@ -55,7 +50,6 @@ class DemoChart extends StatelessWidget {
       pw.Page(
         pageFormat: PdfPageFormat.a4,
         build: (pw.Context context) {
-          // SVG를 배경으로 설정
           return pw.Stack(
             children: [
               pw.Positioned.fill(
@@ -64,50 +58,84 @@ class DemoChart extends StatelessWidget {
                   fit: pw.BoxFit.cover,
                 ),
               ),
+              //region debug
+              // pw.Positioned(
+              //     left: 0,  // X 좌표
+              //     top: 0,
+              //     child :pw.CustomPaint(
+              //         size: const PdfPoint(0, 0),
+              //         painter: (canvas, size) {
+              //           canvas
+              //             ..setColor(PdfColors.red)
+              //             ..drawString(PdfFont.courier(PdfDocument()), 5, "(0,0)", 0, 0)
+              //             ..strokePath();
+              //           for(int x=0; x<500; x+=10) {
+              //             for(int y=0; y>=-728; y-=10) {
+              //               canvas
+              //                 ..setColor(PdfColors.red)
+              //                 ..setLineWidth(0.1)
+              //                 ..drawLine(x.toDouble(), y.toDouble(), x.toDouble(), y.toDouble() + 10)
+              //                 ..strokePath();
+              //             }
+              //           }
+              //
+              //           for(int x=0; x<500; x+=10) {
+              //             for(int y=0; y>=-728; y-=10) {
+              //               canvas
+              //                 ..setColor(PdfColors.red)
+              //                 ..setLineWidth(0.1)
+              //                 ..drawLine(x.toDouble(), y.toDouble(), x.toDouble() + 10, y.toDouble())
+              //                 ..strokePath();
+              //             }
+              //           }
+              //         }
+              //     )
+              // ),
+              //endregion
               //----------------측정 인사 정보--------------//
               //프로필
               pw.Positioned(
                 left: 300,  // X 좌표
                 top: 30,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, member.name, 7, pw.FontWeight.bold, font, 8),
+                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget.member.name, 7, pw.FontWeight.bold, font, 8),
               ),
               //성별
               pw.Positioned(
                 left: 355,  // X 좌표
                 top: 30,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, member.gender, 7, pw.FontWeight.bold, font, 8),
+                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget.member.gender, 7, pw.FontWeight.bold, font, 8),
               ),
               //생년월일
               pw.Positioned(
                 left: 410,  // X 좌표
                 top: 30,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, member.birth, 7, pw.FontWeight.bold, font, 8),
+                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget.member.birth, 7, pw.FontWeight.bold, font, 8),
               ),
               //측정일시
               pw.Positioned(
                 left: 300,  // X 좌표
                 top: 50,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, member.date, 7, pw.FontWeight.bold, font, 8),
+                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget.member.date, 7, pw.FontWeight.bold, font, 8),
               ),
-              
+
               //---------------수면 정보-----------------------//
               //수면 시간
               pw.Positioned(
                 left: 0,  // X 좌표
                 top: 104,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, sleepStage.sleepTime, 12, pw.FontWeight.bold, font, 8),
+                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget.sleepStage.sleepTime, 12, pw.FontWeight.bold, font, 8),
               ),
               //취침 시간
               pw.Positioned(
                 left: 196,  // X 좌표
                 top: 110,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, sleepStage.startSleepTime, 7, pw.FontWeight.bold, font, 8),
+                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget.sleepStage.startSleepTime, 7, pw.FontWeight.bold, font, 8),
               ),
               //기상 시간
               pw.Positioned(
                 left: 291,  // X 좌표
                 top: 110,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, sleepStage.endSleepTime, 7, pw.FontWeight.bold, font, 8),
+                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget.sleepStage.endSleepTime, 7, pw.FontWeight.bold, font, 8),
               ),
 
 
@@ -120,7 +148,7 @@ class DemoChart extends StatelessWidget {
               pw.Positioned(
                 left:100,
                 top: 130,
-                child: ChartUtil.drawSleepStageLineChart(sleepStage),
+                child: ChartUtil.drawSleepStageLineChart(widget.sleepStage),
               ),
               //수면 단계 통계
               pw.Positioned(
@@ -136,24 +164,24 @@ class DemoChart extends StatelessWidget {
                                   verticalInside: pw.BorderSide(color: PdfColors.grey, width: 1)
                               ),
                               children: [
-                                for(int i=0; i<sleepStage.tables.length; i++)
+                                for(int i=0; i<widget.sleepStage.tables.length; i++)
                                   pw.TableRow(
                                       children: [
                                         pw.CustomPaint(
                                             size: const PdfPoint(100, 10),
                                             painter: (canvas, point) {
                                               canvas
-                                                ..setStrokeColor(sleepStage.tables[i].color)
+                                                ..setStrokeColor(widget.sleepStage.tables[i].color)
                                                 ..setLineWidth(5)
                                                 ..moveTo(0, 4)
-                                                ..lineTo(sleepStage.tables[i].count, 4)
+                                                ..lineTo(widget.sleepStage.tables[i].count, 4)
                                                 ..strokePath()
                                               ;
                                             }
                                         ),
-                                        ChartUtil.defaultText(pw.Alignment.centerLeft, sleepStage.tables[i].title, 5, pw.FontWeight.bold, font, 2),
-                                        ChartUtil.defaultText(pw.Alignment.centerLeft, sleepStage.tables[i].time, 5, pw.FontWeight.bold, font, 2),
-                                        ChartUtil.defaultText(pw.Alignment.centerLeft, "${sleepStage.tables[i].count.toInt()}%", 5, pw.FontWeight.bold, font, 2),
+                                        ChartUtil.defaultText(pw.Alignment.centerLeft, widget.sleepStage.tables[i].title, 5, pw.FontWeight.bold, font, 2),
+                                        ChartUtil.defaultText(pw.Alignment.centerLeft, widget.sleepStage.tables[i].time, 5, pw.FontWeight.bold, font, 2),
+                                        ChartUtil.defaultText(pw.Alignment.centerLeft, "${widget.sleepStage.tables[i].count.toInt()}%", 5, pw.FontWeight.bold, font, 2),
                                       ]
                                   )
                               ]
@@ -168,19 +196,19 @@ class DemoChart extends StatelessWidget {
               pw.Positioned(
                 left:100,
                 top: 315,
-                child: ChartUtil.drawEventBarChart(this.eventInfo.apneaCounts, PdfColors.blue200)
+                child: ChartUtil.drawEventBarChart(widget.eventInfo.apneaCounts, PdfColors.blue200)
               ),
               //불규칙한 심장박동
               pw.Positioned(
                   left:100,
                   top: 372,
-                  child: ChartUtil.drawEventBarChart(this.eventInfo.arrhythmiaCounts, PdfColors.red)
+                  child: ChartUtil.drawEventBarChart(widget.eventInfo.arrhythmiaCounts, PdfColors.red)
               ),
               //뒤척임
               pw.Positioned(
                   left:100,
                   top: 430,
-                  child: ChartUtil.drawEventBarChart(this.eventInfo.arrhythmia2Counts, PdfColors.blue700)
+                  child: ChartUtil.drawEventBarChart(widget.eventInfo.arrhythmia2Counts, PdfColors.blue700)
               ),
               //-----------------트랜드 정보-----------------------//
               //호흡수
@@ -192,7 +220,7 @@ class DemoChart extends StatelessWidget {
               pw.Positioned(
                   left:100,
                   top: 542,
-                  child: ChartUtil.drawTrendBreathLineChart(this.trendInfo.breathCounts)
+                  child: ChartUtil.drawTrendBreathLineChart(widget.trendInfo.breathCounts)
               ),
               //산소포화도
               pw.Positioned(
@@ -202,8 +230,8 @@ class DemoChart extends StatelessWidget {
               ),
               pw.Positioned(
                   left:100,
-                  top: 680,
-                  child: ChartUtil.drawTrendOxygenLineChart(this.trendInfo.oxygenCounts)
+                  top: 576,
+                  child: ChartUtil.drawTrendOxygenLineChart(widget.trendInfo.oxygenCounts)
               ),
               //심박수
               pw.Positioned(
@@ -214,7 +242,7 @@ class DemoChart extends StatelessWidget {
               pw.Positioned(
                   left:100,
                   top: 640,
-                  child: ChartUtil.drawTrendHeartRateLineChart(this.trendInfo.heartrateCounts)
+                  child: ChartUtil.drawTrendHeartRateLineChart(widget.trendInfo.heartrateCounts)
               ),
               //체온
               pw.Positioned(
@@ -224,40 +252,40 @@ class DemoChart extends StatelessWidget {
               ),
               pw.Positioned(
                   left:100,
-                  top: 696,
-                  child: ChartUtil.drawTrendTemperatureLineChart(this.trendInfo.temperatureCounts)
+                  top: 680,
+                  child: ChartUtil.drawTrendTemperatureLineChart(widget.trendInfo.temperatureCounts)
               ),
               //------------ 수면 측정 점수-----------------//
               pw.Positioned(
                 left: 370,
                 top: 100,
-                child: ChartUtil.defaultText(pw.Alignment.topLeft, this.sleepReview.point, 12, pw.FontWeight.bold, font, 0)
+                child: ChartUtil.defaultText(pw.Alignment.topLeft, widget.sleepReview.point, 12, pw.FontWeight.bold, font, 0)
               ),
               //------------수면 상태 평가-----------------//
               pw.Positioned(
                 left: 440,
                 top: 224,
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, this.sleepReview.sleepTime, 7, pw.FontWeight.bold, font, 0)
+                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget.sleepReview.sleepTime, 7, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 456,
                   top: 240,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, this.sleepReview.toSleepTime, 7, pw.FontWeight.bold, font, 0)
+                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget.sleepReview.toSleepTime, 7, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 456,
                   top: 252,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, this.sleepReview.arrhythmiaCount, 7, pw.FontWeight.bold, font, 0)
+                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget.sleepReview.arrhythmiaCount, 7, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 456,
                   top: 266,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, this.sleepReview.apneaCount, 7, pw.FontWeight.bold, font, 0)
+                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, this.widget.sleepReview.apneaCount, 7, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 456,
                   top: 282,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, this.sleepReview.arrhythmia2Count, 7, pw.FontWeight.bold, font, 0)
+                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, this.widget.sleepReview.arrhythmia2Count, 7, pw.FontWeight.bold, font, 0)
               ),
               //--------------------생체 정보---------------------//
               //호흡수
@@ -347,12 +375,6 @@ class DemoChart extends StatelessWidget {
 
     return await doc.save();
   }
-
-  Future<Uint8List> _loadImageFromAssets(String path) async {
-    final ByteData data = await rootBundle.load(path);
-    return data.buffer.asUint8List();
-  }
-
 }
 
 
