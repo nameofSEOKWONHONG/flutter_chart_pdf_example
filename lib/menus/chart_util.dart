@@ -11,7 +11,7 @@ import 'chart_model.dart';
 class ChartUtil {
   static pw.CustomPaint drawTimeLine() {
     return pw.CustomPaint(
-        size: const PdfPoint(280, 50),
+        size: const PdfPoint(0, 0),
         painter: (canvas, point) {
           double x1 = 10;
           double x2 = 210;
@@ -44,6 +44,69 @@ class ChartUtil {
             }
 
             x1 = x1+3;
+
+            currentTime = currentTime.add(interval);  // 10분 추가
+          }
+        }
+    );
+  }
+
+  static pw.CustomPaint drawSleepStageLineChart(ChartSleepStage sleepStage) {
+    return pw.CustomPaint(
+        size: const PdfPoint(0, 0),
+        painter: (canvas, point) {
+          DateTime startTime = DateTime(
+              sleepStage.stages[0].date.year
+              , sleepStage.stages[0].date.month
+              , sleepStage.stages[0].date.day
+              , 22
+              , 0
+              , 0);
+          DateTime endTime = DateTime(
+              sleepStage.stages[sleepStage.stages.length - 1].date.year
+              , sleepStage.stages[sleepStage.stages.length - 1].date.month
+              , sleepStage.stages[sleepStage.stages.length - 1].date.day
+              , 09
+              , 0
+              , 0
+          );   // 종료 시간
+          Duration interval = const Duration(minutes: 10);           // 10분 간격
+
+          DateTime currentTime = startTime;
+          double x = 10;
+          double y = 0;
+          while (currentTime.isBefore(endTime) || currentTime.isAtSameMomentAs(endTime)) {
+            var item = sleepStage.stages.where((m) => m.date.isAfter(currentTime)).firstOrNull;
+            if(item?.type == "0") {
+              canvas
+                ..setLineWidth(0.1)
+                ..setFillColor(PdfColors.orange)
+                ..drawRect(x, y - 34, 3, 10)
+                ..fillPath();
+            }
+            else if(item?.type == "1") {
+              canvas
+                ..setLineWidth(0.1)
+                ..setFillColor(PdfColors.blueGrey200)
+                ..drawRect(x, y - 50, 3, 10)
+                ..fillPath();
+            }
+            else if(item?.type == "2") {
+              canvas
+                ..setLineWidth(0.1)
+                ..setFillColor(PdfColors.blue)
+                ..drawRect(x, y - 65, 3, 10)
+                ..fillPath();
+            }
+            else if(item?.type == "3") {
+              canvas
+                ..setLineWidth(0.1)
+                ..setFillColor(PdfColors.purple)
+                ..drawRect(x, y - 81, 3, 10)
+                ..fillPath();
+            }
+
+            x = x+3;
 
             currentTime = currentTime.add(interval);  // 10분 추가
           }
@@ -140,7 +203,7 @@ class ChartUtil {
 
   static pw.CustomPaint drawTrendBreathLineChart(List<DateTimeCount> items) {
     return pw.CustomPaint(
-        size: const PdfPoint(300, 28),
+        size: const PdfPoint(0, 0),
         painter: (canvas, point) {
           double x1 = 10;
           double x2 = 210;
@@ -224,7 +287,7 @@ class ChartUtil {
 
   static pw.CustomPaint drawTrendOxygenLineChart(List<DateTimeCount> items) {
     return pw.CustomPaint(
-        size: const PdfPoint(300, 28),
+        size: const PdfPoint(0, 0),
         painter: (canvas, point) {
           double x1 = 10;
           double x2 = 210;
@@ -305,7 +368,7 @@ class ChartUtil {
 
   static pw.CustomPaint drawTrendHeartRateLineChart(List<DateTimeCount> items) {
     return pw.CustomPaint(
-        size: const PdfPoint(300, 28),
+        size: const PdfPoint(0, 0),
         painter: (canvas, point) {
           double x1 = 10;
           double x2 = 210;
@@ -386,7 +449,7 @@ class ChartUtil {
 
   static pw.CustomPaint drawTrendTemperatureLineChart(List<DateTimeCount> items) {
     return pw.CustomPaint(
-        size: const PdfPoint(300, 28),
+        size: const PdfPoint(0, 0),
         painter: (canvas, point) {
           double x1 = 10;
           double x2 = 210;
@@ -422,7 +485,7 @@ class ChartUtil {
 
               var item = items.where((m) => m.date == currentTime).firstOrNull;
               if(item != null) {
-                var y = normalizeY(item.count, 360, 380, 360, 380);
+                var y = normalizeY(item.count * 1, 30, 40, 30, 40);
                 points.add(ValuePoint(x1, y, (item.count * 0.1)));
               }
             }
@@ -473,9 +536,6 @@ class ChartUtil {
         size: const PdfPoint(0, 0),
         painter: (canvas, point) {
           double x1 = 10;
-          double x2 = 210;
-          double y1 = 40;
-          double y2 = 35;
 
           DateTime startTime = DateTime(
             2024,12,30,
@@ -558,15 +618,3 @@ class ChartUtil {
   }
 }
 
-class NoneValuePoint {
-  final double x;
-  final double y;
-  NoneValuePoint(this.x, this.y);
-}
-class ValuePoint {
-  final double x;
-  final double y;
-  final double v;
-
-  ValuePoint(this.x, this.y, this.v);
-}

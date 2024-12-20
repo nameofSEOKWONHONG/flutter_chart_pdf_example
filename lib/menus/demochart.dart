@@ -109,90 +109,18 @@ class DemoChart extends StatelessWidget {
                 top: 110,  // Y 좌표
                 child: ChartUtil.defaultText(pw.Alignment.centerLeft, sleepStage.endSleepTime, 7, pw.FontWeight.bold, font, 8),
               ),
-              
+
+
               //수면 단계
               pw.Positioned(
                 left:100,
+                top: 178,
+                child: ChartUtil.drawTimeLine()
+              ),
+              pw.Positioned(
+                left:100,
                 top: 130,
-                child: pw.CustomPaint(
-                    size: const PdfPoint(280, 50),
-                    painter: (canvas, point) {
-                      canvas
-                        ..setStrokeColor(PdfColors.black)
-                        ..setLineWidth(0.01)
-                        ..moveTo(10, 40)
-                        ..lineTo(210, 40)
-                      ;
-
-                      DateTime startTime = DateTime(
-                        sleepStage.stages[0].date.year
-                      , sleepStage.stages[0].date.month
-                      , sleepStage.stages[0].date.day
-                      , 22
-                      , 0
-                      , 0);
-                      DateTime endTime = DateTime(
-                            sleepStage.stages[sleepStage.stages.length - 1].date.year
-                          , sleepStage.stages[sleepStage.stages.length - 1].date.month
-                          , sleepStage.stages[sleepStage.stages.length - 1].date.day
-                          , 09
-                          , 0
-                          , 0
-                      );   // 종료 시간
-                      Duration interval = const Duration(minutes: 10);           // 10분 간격
-
-                      DateTime currentTime = startTime;
-                      double x = 10;
-                      double y1 = 40;
-                      double y2 = 35;
-                      while (currentTime.isBefore(endTime) || currentTime.isAtSameMomentAs(endTime)) {
-                        canvas
-                          ..setColor(PdfColors.black)
-                          ..setLineWidth(0.1)
-                          ..drawLine(x, y1, x, y2)
-                          ..strokePath();
-
-                        if (currentTime.minute == 0) {
-                          canvas.drawString(PdfFont.courier(PdfDocument()), 4, "${currentTime.hour.toString().padLeft(2, "0")}", x-2, y2 - 5);
-                        }
-
-                        var item = sleepStage.stages.where((m) => m.date.isAfter(currentTime)).firstOrNull;
-                        if(item?.type == "0") {
-                          canvas
-                            ..setLineWidth(0.1)
-                            ..setFillColor(PdfColors.orange)
-                            ..drawRect(x, y2 - 18, 8, 10)
-                            ..fillPath();
-                        }
-                        else if(item?.type == "1") {
-                          canvas
-                            ..setLineWidth(0.1)
-                            ..setFillColor(PdfColors.blueGrey200)
-                            ..drawRect(x, y2 - 35, 8, 10)
-                            ..fillPath();
-                        }
-                        else if(item?.type == "2") {
-                          canvas
-                            ..setLineWidth(0.1)
-                            ..setFillColor(PdfColors.blue)
-                            ..drawRect(x, y2 - 50, 8, 10)
-                            ..fillPath();
-                        }
-                        else if(item?.type == "3") {
-                          canvas
-                            ..setLineWidth(0.1)
-                            ..setFillColor(PdfColors.purple)
-                            ..drawRect(x, y2 - 65, 8, 10)
-                            ..fillPath();
-                        }
-
-
-                        x = x+3;
-
-                        currentTime = currentTime.add(interval);  // 10분 추가
-                      }
-                    }
-                ),
+                child: ChartUtil.drawSleepStageLineChart(sleepStage),
               ),
               //수면 단계 통계
               pw.Positioned(
@@ -258,45 +186,45 @@ class DemoChart extends StatelessWidget {
               //호흡수
               pw.Positioned(
                 left:100,
-                top: 498,
+                top: 550,
                 child: ChartUtil.drawTimeLine()
               ),
               pw.Positioned(
                   left:100,
-                  top: 514,
+                  top: 542,
                   child: ChartUtil.drawTrendBreathLineChart(this.trendInfo.breathCounts)
               ),
               //산소포화도
               pw.Positioned(
                   left:100,
-                  top: 544,
+                  top: 596,
                   child: ChartUtil.drawTimeLine()
               ),
               pw.Positioned(
                   left:100,
-                  top: 650,
+                  top: 680,
                   child: ChartUtil.drawTrendOxygenLineChart(this.trendInfo.oxygenCounts)
               ),
               //심박수
               pw.Positioned(
                   left:100,
-                  top: 589,
+                  top: 640,
                   child: ChartUtil.drawTimeLine()
               ),
               pw.Positioned(
                   left:100,
-                  top: 610,
+                  top: 640,
                   child: ChartUtil.drawTrendHeartRateLineChart(this.trendInfo.heartrateCounts)
               ),
               //체온
               pw.Positioned(
                   left:100,
-                  top: 635,
+                  top: 686,
                   child: ChartUtil.drawTimeLine()
               ),
               pw.Positioned(
                   left:100,
-                  top: 1000,
+                  top: 696,
                   child: ChartUtil.drawTrendTemperatureLineChart(this.trendInfo.temperatureCounts)
               ),
               //------------ 수면 측정 점수-----------------//

@@ -71,3 +71,16 @@ class ChartMember {
 
   ChartMember(this.name, this.gender, this.birth, this.date);
 }
+
+class NoneValuePoint {
+  final double x;
+  final double y;
+  NoneValuePoint(this.x, this.y);
+}
+class ValuePoint {
+  final double x;
+  final double y;
+  final double v;
+
+  ValuePoint(this.x, this.y, this.v);
+}
