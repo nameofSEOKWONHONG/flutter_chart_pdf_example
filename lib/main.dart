@@ -70,14 +70,25 @@ class MainPage extends StatelessWidget {
       arrhythmia2Counts.add(DateTimeCount(ChartUtil.getRandomNumber(15, 100).toDouble(), currentTime));
 
       breathCounts.add(DateTimeCount(ChartUtil.getRandomNumber(15, 25).toDouble(), currentTime));
-      oxygenCounts.add(DateTimeCount(ChartUtil.getRandomNumber(90, 100).toDouble(), currentTime));
-      heartrateCounts.add(DateTimeCount(ChartUtil.getRandomNumber(90, 100).toDouble(), currentTime));
-      tempratureCounts.add(DateTimeCount(ChartUtil.getRandomNumber(365, 370).toDouble(), currentTime));
+      oxygenCounts.add(DateTimeCount(ChartUtil.getRandomNumber(98, 100).toDouble(), currentTime));
+      heartrateCounts.add(DateTimeCount(ChartUtil.getRandomNumber(90, 140).toDouble(), currentTime));
+      tempratureCounts.add(DateTimeCount(ChartUtil.getRandomNumber(360, 375).toDouble(), currentTime));
 
       currentTime = currentTime.add(interval);  // 10분 추가
     }
 
-    SleepReview sleepReview = SleepReview("68", "7시간 12분", "1시간", "10회", "10회", "10회");
+    SleepStateReview sleepReview = SleepStateReview("68", "7시간 12분", "1시간", "10회", "10회", "10회");
+    BioEstimate bioEstimate = BioEstimate("평균 16회/분"
+        , "2건 발생"
+        , "2건 발생"
+        , "평균 98%"
+        , "2건 발생"
+        , "평균 92bpm"
+        , "2건 발생"
+        , "2건 발생"
+        , "평균 36.5℃"
+        , "1건 발생"
+        , "1건 발생");
 
     var sleepStage = ChartSleepStage("8시간 00분", "22:00", "06:00", stages, tables);
     return Scaffold(
@@ -128,10 +139,13 @@ class MainPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => DemoChart(member, sleepStage,
-                    EventInfo(apneaCounts, arrhythmiaCounts, arrhythmia2Counts),
-                    TrendInfo(breathCounts, oxygenCounts, heartrateCounts, tempratureCounts),
-                    sleepReview
+                  builder: (context) => DemoChart(
+                      member
+                      , sleepStage
+                      , EventInfo(apneaCounts, arrhythmiaCounts, arrhythmia2Counts)
+                      , TrendInfo(breathCounts, oxygenCounts, heartrateCounts, tempratureCounts)
+                      , sleepReview
+                      , bioEstimate
                   ),
                 ),
               );

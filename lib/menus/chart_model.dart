@@ -1,6 +1,6 @@
 import 'package:pdf/pdf.dart';
 
-class SleepReview {
+class SleepStateReview {
   final String point;
   final String sleepTime;
   final String toSleepTime;
@@ -8,7 +8,7 @@ class SleepReview {
   final String apneaCount;
   final String arrhythmia2Count;
 
-  SleepReview(this.point, this.sleepTime, this.toSleepTime, this.arrhythmiaCount,
+  SleepStateReview(this.point, this.sleepTime, this.toSleepTime, this.arrhythmiaCount,
       this.apneaCount, this.arrhythmia2Count);
 }
 
@@ -72,15 +72,37 @@ class ChartMember {
   ChartMember(this.name, this.gender, this.birth, this.date);
 }
 
-class NoneValuePoint {
-  final double x;
-  final double y;
-  NoneValuePoint(this.x, this.y);
-}
 class ValuePoint {
   final double x;
   final double y;
   final double v;
 
   ValuePoint(this.x, this.y, this.v);
+}
+
+class BioEstimate {
+  final String breathCount;
+  final String breathUp;
+  final String breathDown;
+  final String oxygenRate;
+  final String oxygenDown;
+  final String heartRateCount;
+  final String heartRateUp;
+  final String heartRateDown;
+  final String temperature;
+  final String temperatureUp;
+  final String temperatureDown;
+
+  BioEstimate(
+      this.breathCount,
+      this.breathUp,
+      this.breathDown,
+      this.oxygenRate,
+      this.oxygenDown,
+      this.heartRateCount,
+      this.heartRateUp,
+      this.heartRateDown,
+      this.temperature,
+      this.temperatureUp,
+      this.temperatureDown);
 }
