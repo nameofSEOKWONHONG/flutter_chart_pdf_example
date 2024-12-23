@@ -7,7 +7,7 @@ import 'chart_model.dart';
 
 
 
-class ChartUtil {
+class PdfUtils {
   static pw.CustomPaint drawTimeLine() {
     return pw.CustomPaint(
         size: const PdfPoint(0, 0),
@@ -65,7 +65,7 @@ class ChartUtil {
               ..strokePath();
 
             if (currentTime.minute == 0) {
-              canvas.drawString(PdfFont.courier(PdfDocument()), 4, currentTime.hour.toString().padLeft(2, "0"), x1-2, y2 - 5);
+              canvas.drawString(PdfFont.courier(PdfDocument()), 4, currentTime.hour.toString().padLeft(2, "0"), x1-3, y2 - 5);
             }
 
             x1 = x1+3;
@@ -76,57 +76,62 @@ class ChartUtil {
     );
   }
 
-  static pw.CustomPaint drawSleepStageLineChart(ChartSleepStage sleepStage) {
+  static pw.CustomPaint drawSleepStageBarChart(List<PdfSleepStage> items) {
     return pw.CustomPaint(
         size: const PdfPoint(0, 0),
         painter: (canvas, point) {
+          var d1 = 0;
+          if(items[0].date.day - items[items.length - 1].date.day == 0) {
+            d1 = 1;
+          }
           DateTime startTime = DateTime(
-              sleepStage.stages[0].date.year
-              , sleepStage.stages[0].date.month
-              , sleepStage.stages[0].date.day
-              , 22
-              , 0
-              , 0);
+              items[0].date.year,
+              items[0].date.month,
+              items[0].date.day - d1,
+              22,
+              0,
+              0
+          ); // 시작 시간
           DateTime endTime = DateTime(
-              sleepStage.stages[sleepStage.stages.length - 1].date.year
-              , sleepStage.stages[sleepStage.stages.length - 1].date.month
-              , sleepStage.stages[sleepStage.stages.length - 1].date.day
-              , 09
-              , 0
-              , 0
+              items[items.length - 1].date.year,
+              items[items.length - 1].date.month,
+              items[items.length - 1].date.day,
+              9,
+              0,
+              0
           );   // 종료 시간
           Duration interval = const Duration(minutes: 10);           // 10분 간격
 
           DateTime currentTime = startTime;
-          double x = 10;
+          double x = 13;
           double y = 0;
           while (currentTime.isBefore(endTime) || currentTime.isAtSameMomentAs(endTime)) {
-            var item = sleepStage.stages.where((m) => m.date.isAfter(currentTime)).firstOrNull;
-            if(item?.type == "0") {
+            var item = items.where((m) => m.date.isAfter(currentTime)).firstOrNull;
+            if(item?.type == 0) {
               canvas
                 ..setLineWidth(0.1)
-                ..setFillColor(PdfColors.orange)
+                ..setFillColor(item?.color)
                 ..drawRect(x, y - 34, 3, 10)
                 ..fillPath();
             }
-            else if(item?.type == "1") {
+            else if(item?.type == 1) {
               canvas
                 ..setLineWidth(0.1)
-                ..setFillColor(PdfColors.blueGrey200)
+                ..setFillColor(item?.color)
                 ..drawRect(x, y - 50, 3, 10)
                 ..fillPath();
             }
-            else if(item?.type == "2") {
+            else if(item?.type == 2) {
               canvas
                 ..setLineWidth(0.1)
-                ..setFillColor(PdfColors.blue)
+                ..setFillColor(item?.color)
                 ..drawRect(x, y - 65, 3, 10)
                 ..fillPath();
             }
-            else if(item?.type == "3") {
+            else if(item?.type == 3) {
               canvas
                 ..setLineWidth(0.1)
-                ..setFillColor(PdfColors.purple)
+                ..setFillColor(item?.color)
                 ..drawRect(x, y - 81, 3, 10)
                 ..fillPath();
             }
@@ -139,7 +144,7 @@ class ChartUtil {
     );
   }
 
-  static pw.CustomPaint drawEventBarChart(List<DateTimeCount> items, PdfColor color) {
+  static pw.CustomPaint drawEventBarChart(List<DateTimeCount> items, PdfColor color, int maxValue) {
     return pw.CustomPaint(
         size: const PdfPoint(280, 50),
         painter: (canvas, point) {
@@ -156,23 +161,26 @@ class ChartUtil {
             ..strokePath()
           ;
 
-          // DateTime startTime = DateTime(2024, 12, 30, 22, 0, 0); // 시작 시간
-          // DateTime endTime = DateTime(2024, 12, 31, 9, 0, 0);   // 종료 시간
+
+          var d1 = 0;
+          if(items[0].date.day - items[items.length - 1].date.day == 0) {
+            d1 = 1;
+          }
           DateTime startTime = DateTime(
               items[0].date.year,
               items[0].date.month,
-              items[0].date.day,
+              items[0].date.day - d1,
               22,
-              00,
-              00
-          );
+              0,
+              0
+          ); // 시작 시간
           DateTime endTime = DateTime(
               items[items.length - 1].date.year,
               items[items.length - 1].date.month,
               items[items.length - 1].date.day,
-              09,
-              00,
-              00
+              9,
+              0,
+              0
           );
           Duration interval = const Duration(minutes: 10);           // 10분 간격
 
@@ -195,7 +203,7 @@ class ChartUtil {
             ..drawString(PdfFont.courier(PdfDocument()), 5, "0", -20, 5);
           canvas
             ..setColor(PdfColors.black)
-            ..drawString(PdfFont.courier(PdfDocument()), 5, ">=50", -20, y2 - 10);
+            ..drawString(PdfFont.courier(PdfDocument()), 5, ">=${maxValue}", -20, y2 - 10);
 
           while (currentTime.isBefore(endTime) || currentTime.isAtSameMomentAs(endTime)) {
             canvas
@@ -210,12 +218,14 @@ class ChartUtil {
 
             var item = items.where((e) => e.date == currentTime).firstOrNull;
             if(item != null) {
-              double v = normalizeY(item.count, 0, 100, 0, 20);
-              canvas
-                ..setColor(color)
-                ..setLineWidth(1)
-                ..drawLine(x1, (y1 - 40), x1, v)
-                ..strokePath();
+              if(item.count > 0) {
+                double v = normalizeY(item.count, 0, maxValue.toDouble(), 0, 20);
+                canvas
+                  ..setColor(color)
+                  ..setLineWidth(1)
+                  ..drawLine(x1, (y1 - 40), x1, v)
+                  ..strokePath();
+              }
             }
 
             x1 = x1+3;
@@ -232,10 +242,14 @@ class ChartUtil {
         painter: (canvas, point) {
           double x1 = 10;
 
+          var d1 = 0;
+          if(items[0].date.day - items[items.length - 1].date.day == 0) {
+            d1 = 1;
+          }
           DateTime startTime = DateTime(
             items[0].date.year,
             items[0].date.month,
-            items[0].date.day,
+            items[0].date.day - d1,
             22,
             0,
             0
@@ -254,17 +268,11 @@ class ChartUtil {
 
           List<ValuePoint> points = [];
           while (currentTime.isBefore(endTime) || currentTime.isAtSameMomentAs(endTime)) {
-            if(currentTime.minute == 0 &&
-                currentTime.second == 0) {
-              //var y = getRandomNumber(10, 28).toDouble();
-              //var n = normalizeY(y, 10, 30, 10, 28);
-
-              var item = items.where((m) => m.date == currentTime).firstOrNull;
-              if(item != null) {
-                var y = normalizeY(item.count, yMin, yMax, rangeMin, rangeMax);
-                //var y = normalizeY(item.count, 10, 30, 10, 20);
-                points.add(ValuePoint(x1, y, item.count));
-              }
+            var item = items.where((m) => m.date == currentTime).firstOrNull;
+            if(item != null) {
+              var y = normalizeY(item.count, yMin, yMax, rangeMin, rangeMax);
+              //var y = normalizeY(item.count, 10, 30, 10, 20);
+              points.add(ValuePoint(x1, y, item.count));
             }
 
             x1 = x1+3;
@@ -417,6 +425,11 @@ class ChartUtil {
   static double normalizeY(double yInput, double yMin, double yMax, double rangeMin, double rangeMax) {
     yInput = min(yInput, yMax);
     return ((yInput - yMin) / (yMax - yMin)) * (rangeMax - rangeMin) + rangeMin;
+  }
+
+  static double getRandomDouble(double from, double to) {
+    final random = Random();
+    return from + (random.nextDouble() * (to - from));
   }
 }
 

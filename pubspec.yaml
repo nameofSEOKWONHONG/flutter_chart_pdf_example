@@ -40,6 +40,8 @@ dependencies:
   pdf:
   printing:
   flutter_pdfview:
+  collection:
+  darq:
 
 dev_dependencies:
   flutter_test:

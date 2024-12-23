@@ -1,12 +1,16 @@
 import 'package:flu_example/menus/barchart.dart';
 import 'package:flu_example/menus/barchart2.dart';
-import 'package:flu_example/menus/chart_util.dart';
+import 'package:flu_example/menus/pdfUtils.dart';
 import 'package:flu_example/menus/demochart.dart';
 import 'package:flu_example/menus/linechart.dart';
+import 'package:flu_example/menus/model.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
+import 'package:collection/collection.dart';
+
 
 import 'menus/chart_model.dart';
+import 'menus/pdfDataConverter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,67 +34,142 @@ class MainPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var member = ChartMember("이지은", "여성", "1990.03.12", "2024년 9월 24일 오후 10시 ~ 9월 24일 오전 6시");
-    List<ChartStage> stages =[];
-    stages.add(ChartStage("0", DateTime(2024, 12, 30, 22, 59, 59)));
-    stages.add(ChartStage("1", DateTime(2024, 12, 30, 23, 59, 59)));
-    stages.add(ChartStage("2", DateTime(2024, 12, 31, 00, 59, 59)));
-    stages.add(ChartStage("3", DateTime(2024, 12, 31, 01, 59, 59)));
-    stages.add(ChartStage("2", DateTime(2024, 12, 31, 02, 59, 59)));
-    stages.add(ChartStage("1", DateTime(2024, 12, 31, 03, 59, 59)));
-    stages.add(ChartStage("1", DateTime(2024, 12, 31, 04, 59, 59)));
-    stages.add(ChartStage("2", DateTime(2024, 12, 31, 05, 59, 59)));
-    stages.add(ChartStage("3", DateTime(2024, 12, 31, 06, 59, 59)));
-    stages.add(ChartStage("2", DateTime(2024, 12, 31, 07, 59, 59)));
-    stages.add(ChartStage("0", DateTime(2024, 12, 31, 08, 59, 59)));
-
-    List<ChartStageTable> tables = [];
-    tables.add(ChartStageTable("비수면", 10, "48분", PdfColors.orange));
-    tables.add(ChartStageTable("램(REM) 수면", 20, "1시간 36분", PdfColors.blueGrey200));
-    tables.add(ChartStageTable("얕은 수면", 40, "3시간 12분", PdfColors.blue));
-    tables.add(ChartStageTable("깊은 수면", 30, "2시간 24분", PdfColors.purple));
-
-    List<DateTimeCount> apneaCounts = [];
-    List<DateTimeCount> arrhythmiaCounts = [];
-    List<DateTimeCount> arrhythmia2Counts = [];
-
-    List<DateTimeCount> breathCounts = [];
-    List<DateTimeCount> oxygenCounts = [];
-    List<DateTimeCount> heartrateCounts = [];
-    List<DateTimeCount> tempratureCounts = [];
-
+    //사용자 정보
+    var user = PdfUserInfo("이지은", "여성", "1990.03.12", "2024년 9월 24일 오후 10시 ~ 9월 24일 오전 6시");
     DateTime start = DateTime(2024, 12, 30, 22, 00, 00);
     DateTime end = DateTime(2024, 12, 31, 09, 00, 00);
-    Duration interval = const Duration(minutes: 10);
-    DateTime currentTime = start;
 
-    while (currentTime.isBefore(end) || currentTime.isAtSameMomentAs(end)) {
-      apneaCounts.add(DateTimeCount(ChartUtil.getRandomNumber(15, 100).toDouble(), currentTime));
-      arrhythmiaCounts.add(DateTimeCount(ChartUtil.getRandomNumber(15, 100).toDouble(), currentTime));
-      arrhythmia2Counts.add(DateTimeCount(ChartUtil.getRandomNumber(15, 100).toDouble(), currentTime));
+    List<Stage> getTempStage() {
+      List<Stage> items = [];
+      DateTime start = DateTime(2024, 12, 30, 23, 00, 00);
+      DateTime end = DateTime(2024, 12, 31, 07, 00, 00);
+      Duration interval = const Duration(seconds: 330);
+      DateTime currentTime = start;
 
-      breathCounts.add(DateTimeCount(ChartUtil.getRandomNumber(15, 25).toDouble(), currentTime));
-      oxygenCounts.add(DateTimeCount(ChartUtil.getRandomNumber(98, 100).toDouble(), currentTime));
-      heartrateCounts.add(DateTimeCount(ChartUtil.getRandomNumber(90, 140).toDouble(), currentTime));
-      tempratureCounts.add(DateTimeCount(ChartUtil.getRandomNumber(360, 375).toDouble(), currentTime));
+      var i = 0;
+      while (currentTime.isBefore(end) || currentTime.isAtSameMomentAs(end)) {
+        var item = Stage(profileId: "test", timestamp: currentTime, type: PdfUtils.getRandomNumber(0, 3));
+        if(i >= 0 && i < 10) {
+          items.add(Stage(profileId: "test", timestamp: currentTime, type: 0));
+        }
+        else {
+          items.add(item);
+        }
+        i++;
+        currentTime = currentTime.add(interval);
+      }
 
-      currentTime = currentTime.add(interval);  // 10분 추가
+      return items;
+    }
+    List<Apnea> getTempApnea() {
+      List<Apnea> items = [];
+      DateTime start = DateTime(2024, 12, 30, 23, 00, 00);
+      DateTime end = DateTime(2024, 12, 31, 07, 00, 00);
+      Duration interval = const Duration(seconds: 180);
+      DateTime currentTime = start;
+
+      while (currentTime.isBefore(end) || currentTime.isAtSameMomentAs(end)) {
+        var item = Apnea(profileId: "test", timestamp: currentTime, type: 0);
+        var n = PdfUtils.getRandomNumber(0, 1);
+        if(n == 0) {
+          items.add(item);
+        }
+        currentTime = currentTime.add(interval);
+      }
+
+      return items;
+    }
+    List<Arrhythmia> getTempArrhythmia(){
+      List<Arrhythmia> result = [];
+
+      DateTime start = DateTime(2024, 12, 31, 00, 00, 00);
+      DateTime end = DateTime(2024, 12, 31, 07, 00, 00);
+      Duration interval = const Duration(seconds: 10);
+      DateTime currentTime = start;
+
+      while (currentTime.isBefore(end) || currentTime.isAtSameMomentAs(end)) {
+        var item = Arrhythmia(profileId: "test", timestamp: currentTime, type: 0);
+        var n = PdfUtils.getRandomNumber(0, 100);
+        if(n == 0) {
+          result.add(item);
+        }
+        currentTime = currentTime.add(interval);
+      }
+
+      return result;
+    }
+    List<ArrhythmiaBeat> getTempArrhythmiaBeat(){
+      List<ArrhythmiaBeat> result = [];
+
+      DateTime start = DateTime(2024, 12, 31, 00, 00, 00);
+      DateTime end = DateTime(2024, 12, 31, 07, 00, 00);
+      Duration interval = const Duration(seconds: 10);
+      DateTime currentTime = start;
+
+      while (currentTime.isBefore(end) || currentTime.isAtSameMomentAs(end)) {
+        var item = ArrhythmiaBeat(profileId: "test", timestamp: currentTime, type: 0);
+        var n = PdfUtils.getRandomNumber(0, 100);
+        if(n == 0) {
+          result.add(item);
+        }
+        currentTime = currentTime.add(interval);
+      }
+
+      return result;
+    }
+    List<Motion> getTempMotion(){
+      List<Motion> result = [];
+
+      DateTime start = DateTime(2024, 12, 31, 00, 00, 00);
+      DateTime end = DateTime(2024, 12, 31, 07, 00, 00);
+      Duration interval = const Duration(seconds: 180);
+      DateTime currentTime = start;
+
+      while (currentTime.isBefore(end) || currentTime.isAtSameMomentAs(end)) {
+        var item = Motion(profileId: "test", timestamp: currentTime, type: 1);
+        var n = PdfUtils.getRandomNumber(0, 1);
+        if(n == 0) {
+          result.add(item);
+        }
+        currentTime = currentTime.add(interval);
+      }
+
+      return result;
+    }
+    List<TrendData> getTempTrendData(){
+      List<TrendData> result = [];
+
+      DateTime start = DateTime(2024, 12, 31, 00, 00, 00);
+      DateTime end = DateTime(2024, 12, 31, 07, 00, 00);
+      Duration interval = const Duration(minutes: 10);
+      DateTime currentTime = start;
+
+      while (currentTime.isBefore(end) || currentTime.isAtSameMomentAs(end)) {
+        var item = TrendData(
+            profileId: "test",
+            sensorNo: "test",
+            date: currentTime,
+            rrAvg:PdfUtils.getRandomNumber(15, 24).toDouble(),
+            spo2Avg: PdfUtils.getRandomDouble(98.0, 99.9),
+            hrAvg:  PdfUtils.getRandomNumber(55, 94).toDouble(),
+            tempAvg: PdfUtils.getRandomDouble(36.1, 37.5));
+
+        result.add(item);
+
+        currentTime = currentTime.add(interval);
+      }
+
+      return result;
     }
 
-    SleepStateReview sleepReview = SleepStateReview("68", "7시간 12분", "1시간", "10회", "10회", "10회");
-    BioEstimate bioEstimate = BioEstimate("평균 16회/분"
-        , "2건 발생"
-        , "2건 발생"
-        , "평균 98%"
-        , "2건 발생"
-        , "평균 92bpm"
-        , "2건 발생"
-        , "2건 발생"
-        , "평균 36.5℃"
-        , "1건 발생"
-        , "1건 발생");
+    var stages = getTempStage();
+    var apneas = getTempApnea();
+    var arrhythmias = getTempArrhythmia();
+    var arrhythmiaBeats = getTempArrhythmiaBeat();
+    var motions = getTempMotion();
+    var trendDatum = getTempTrendData();
 
-    var sleepStage = ChartSleepStage("8시간 00분", "22:00", "06:00", stages, tables);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Main Page"),
@@ -140,12 +219,7 @@ class MainPage extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => DemoChart(
-                      member
-                      , sleepStage
-                      , EventInfo(apneaCounts, arrhythmiaCounts, arrhythmia2Counts)
-                      , TrendInfo(breathCounts, oxygenCounts, heartrateCounts, tempratureCounts)
-                      , sleepReview
-                      , bioEstimate
+                      start, end, user, stages, apneas, arrhythmias, arrhythmiaBeats, motions, trendDatum
                   ),
                 ),
               );
@@ -176,6 +250,5 @@ class DetailPage extends StatelessWidget {
       ),
     );
   }
-
-
 }
+

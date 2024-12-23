@@ -59,20 +59,30 @@ class Motion {
 }
 
 class TrendData {
-  late String profileId;
-  late String sensorNo;
-  late DateTime date;
+  String profileId;
+  String sensorNo;
+  DateTime date;
   double? hrAvg;
-  int? hrMax;
-  int? hrMin;
+  late int? hrMax;
+  late int? hrMin;
   double? rrAvg;
-  int? rrMax;
-  int? rrMin;
+  late int? rrMax;
+  late int? rrMin;
   double? tempAvg;
-  int? tempMax;
-  int? tempMin;
+  late int? tempMax;
+  late int? tempMin;
   double? spo2Avg;
-  int? spo2Max;
-  int? spo2Min;
+  late int? spo2Max;
+  late int? spo2Min;
   late int n;
+
+  TrendData({
+    required this.profileId,
+    required this.sensorNo,
+    required this.date,
+    required this.hrAvg,
+    required this.rrAvg,
+    required this.tempAvg,
+    required this.spo2Avg
+  });
 }

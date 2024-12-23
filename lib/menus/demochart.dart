@@ -1,4 +1,6 @@
-import 'package:flu_example/menus/chart_util.dart';
+import 'package:flu_example/menus/model.dart';
+import 'package:flu_example/menus/pdfDataConverter.dart';
+import 'package:flu_example/menus/pdfUtils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
@@ -8,24 +10,96 @@ import 'package:printing/printing.dart';
 import 'chart_model.dart';
 
 class DemoChart extends StatefulWidget {
-  ChartMember _member;
-  ChartSleepStage _sleepStage;
-  EventInfo _eventInfo;
-  TrendInfo _trendInfo;
-  SleepStateReview _sleepReview;
-  BioEstimate _bioEstimate;
+  DateTime start;
+  DateTime end;
+  PdfUserInfo user;
+  List<Stage> stages;
+  List<Apnea> apneas;
+  List<Arrhythmia> arrhythmias;
+  List<ArrhythmiaBeat> arrhythmiaBeats;
+  List<Motion> motions;
+  List<TrendData> trendDatum;
 
-  DemoChart(this._member, this._sleepStage, this._eventInfo, this._trendInfo, this._sleepReview, this._bioEstimate, {super.key});
+
+  DemoChart(this.start, this.end, this.user, this.stages,
+    this.apneas, this.arrhythmias, this.arrhythmiaBeats, this.motions,
+      this.trendDatum,
+      {super.key});
 
   @override
-  State<DemoChart> createState() => _DemoChartState();
+  State<DemoChart> createState() {
+    return _DemoChartState();
+  }
 }
 
 class _DemoChartState extends State<DemoChart> {
+  late PdfSleepInfo _sleepInfo;
+  late List<DateTimeCount> _apneaCounts;
+  late List<DateTimeCount> _arrhythmiaCounts;
+  late List<DateTimeCount> _motionCounts;
+  late List<DateTimeCount> _breathCounts;
+  late List<DateTimeCount> _spo2Counts;
+  late List<DateTimeCount> _heartRateCounts;
+  late List<DateTimeCount> _temperatureCounts;
+  late SleepStateReview _sleepReview;
+  late BioEstimate _bioEstimate;
+
   Future<pw.Font> loadKoreanFont() async {
     // 폰트 파일 로드
     final fontData = await rootBundle.load('assets/NanumGothic.ttf');
     return pw.Font.ttf(fontData);
+  }
+
+  @override
+  void initState() {
+    DateTime sd = DateTime(widget.start.year, widget.start.month, widget.start.day, 22, 00, 00);
+    DateTime ed = DateTime(widget.end.year, widget.end.month, widget.end.day, 09, 00, 00);
+
+    var converter = PdfDataConverter();
+    var sleepStage = converter.stageToPdfSleepStage(sd, ed, widget.stages);
+    var sleepTable = converter.stageToPdfSleepStageTable(sleepStage);
+    var map = converter.stageToSleepInfo(sleepStage);
+    _sleepInfo = PdfSleepInfo(map["totalSleepTime"].toString(), map["sleepTime"].toString(), map["wakeTime"].toString(), sleepStage, sleepTable);
+
+    _apneaCounts = converter.apneaToDateTimeCount(sd, ed, widget.apneas);
+    _arrhythmiaCounts = converter.arrhythmiaToDateTimeCount(sd, ed, widget.arrhythmias, widget.arrhythmiaBeats);
+    _motionCounts = converter.motionToDateTimeCount(sd, ed, widget.motions);
+
+    _breathCounts = converter.trendDataToDateTimeCount(sd, ed, widget.trendDatum, 0);
+    _spo2Counts = converter.trendDataToDateTimeCount(sd, ed, widget.trendDatum, 1);
+    _heartRateCounts = converter.trendDataToDateTimeCount(sd, ed, widget.trendDatum, 2);
+    _temperatureCounts = converter.trendDataToDateTimeCount(sd, ed, widget.trendDatum, 3);
+
+    var event = EventInfo(_apneaCounts, _arrhythmiaCounts, _motionCounts);
+    var trend = TrendInfo(_breathCounts, _spo2Counts, _heartRateCounts, _temperatureCounts);
+
+    var point = 100 - _apneaCounts.length;
+    var motionCount = 0;
+    for(var item in _motionCounts) {
+      motionCount += item.count.toInt();
+    }
+    var apneaCount = 0;
+    for(var item in _apneaCounts) {
+      apneaCount += item.count.toInt();
+    }
+
+    _sleepReview = SleepStateReview(point.toString(),
+        "${map["totalSleepTime"].toString()}",
+        "${map["sleepInterval"]}",
+        "${_arrhythmiaCounts.length}회",
+        "${apneaCount}회",
+        "${motionCount}회");
+    _bioEstimate = BioEstimate("평균 16회/분"
+        , "2건 발생"
+        , "2건 발생"
+        , "평균 98%"
+        , "2건 발생"
+        , "평균 92bpm"
+        , "2건 발생"
+        , "2건 발생"
+        , "평균 36.5℃"
+        , "1건 발생"
+        , "1건 발생");
   }
 
   @override
@@ -99,25 +173,25 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                 left: 300,  // X 좌표
                 top: 30,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._member.name, 7, pw.FontWeight.bold, font, 8),
+                child: PdfUtils.defaultText(pw.Alignment.centerLeft,  widget.user.name, 7, pw.FontWeight.bold, font, 8),
               ),
               //성별
               pw.Positioned(
                 left: 355,  // X 좌표
                 top: 30,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._member.gender, 7, pw.FontWeight.bold, font, 8),
+                child: PdfUtils.defaultText(pw.Alignment.centerLeft,  widget.user.gender, 7, pw.FontWeight.bold, font, 8),
               ),
               //생년월일
               pw.Positioned(
                 left: 410,  // X 좌표
                 top: 30,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._member.birth, 7, pw.FontWeight.bold, font, 8),
+                child: PdfUtils.defaultText(pw.Alignment.centerLeft,  widget.user.birth, 7, pw.FontWeight.bold, font, 8),
               ),
               //측정일시
               pw.Positioned(
                 left: 300,  // X 좌표
                 top: 50,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._member.date, 7, pw.FontWeight.bold, font, 8),
+                child: PdfUtils.defaultText(pw.Alignment.centerLeft,  widget.user.date, 7, pw.FontWeight.bold, font, 8),
               ),
               //endregion
 
@@ -126,19 +200,19 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                 left: 0,  // X 좌표
                 top: 104,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._sleepStage.sleepTime, 12, pw.FontWeight.bold, font, 8),
+                child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _sleepInfo.sleepTime, 12, pw.FontWeight.bold, font, 8),
               ),
               //취침 시간
               pw.Positioned(
                 left: 196,  // X 좌표
                 top: 110,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._sleepStage.startSleepTime, 7, pw.FontWeight.bold, font, 8),
+                child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _sleepInfo.startSleepTime, 7, pw.FontWeight.bold, font, 8),
               ),
               //기상 시간
               pw.Positioned(
                 left: 291,  // X 좌표
                 top: 110,  // Y 좌표
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._sleepStage.endSleepTime, 7, pw.FontWeight.bold, font, 8),
+                child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _sleepInfo.endSleepTime, 7, pw.FontWeight.bold, font, 8),
               ),
 
 
@@ -146,12 +220,12 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                 left:100,
                 top: 178,
-                child: ChartUtil.drawTimeLine()
+                child: PdfUtils.drawTimeLine()
               ),
               pw.Positioned(
                 left:100,
                 top: 130,
-                child: ChartUtil.drawSleepStageLineChart(widget._sleepStage),
+                child: PdfUtils.drawSleepStageBarChart( _sleepInfo.stages),
               ),
               //수면 단계 통계
               pw.Positioned(
@@ -167,24 +241,24 @@ class _DemoChartState extends State<DemoChart> {
                                   verticalInside: pw.BorderSide(color: PdfColors.grey, width: 1)
                               ),
                               children: [
-                                for(int i=0; i<widget._sleepStage.tables.length; i++)
+                                for(int i=0; i< _sleepInfo.tables.length; i++)
                                   pw.TableRow(
                                       children: [
                                         pw.CustomPaint(
                                             size: const PdfPoint(100, 10),
                                             painter: (canvas, point) {
                                               canvas
-                                                ..setStrokeColor(widget._sleepStage.tables[i].color)
+                                                ..setStrokeColor( _sleepInfo.tables[i].color)
                                                 ..setLineWidth(5)
                                                 ..moveTo(0, 4)
-                                                ..lineTo(widget._sleepStage.tables[i].count, 4)
+                                                ..lineTo( _sleepInfo.tables[i].count, 4)
                                                 ..strokePath()
                                               ;
                                             }
                                         ),
-                                        ChartUtil.defaultText(pw.Alignment.centerLeft, widget._sleepStage.tables[i].title, 5, pw.FontWeight.bold, font, 2),
-                                        ChartUtil.defaultText(pw.Alignment.centerLeft, widget._sleepStage.tables[i].time, 5, pw.FontWeight.bold, font, 2),
-                                        ChartUtil.defaultText(pw.Alignment.centerLeft, "${widget._sleepStage.tables[i].count.toInt()}%", 5, pw.FontWeight.bold, font, 2),
+                                        PdfUtils.defaultText(pw.Alignment.centerLeft,  _sleepInfo.tables[i].title, 5, pw.FontWeight.bold, font, 2),
+                                        PdfUtils.defaultText(pw.Alignment.centerLeft,  _sleepInfo.tables[i].time, 5, pw.FontWeight.bold, font, 2),
+                                        PdfUtils.defaultText(pw.Alignment.centerLeft, "${ _sleepInfo.tables[i].count.toInt()}%", 5, pw.FontWeight.bold, font, 2),
                                       ]
                                   )
                               ]
@@ -201,19 +275,19 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                 left:100,
                 top: 315,
-                child: ChartUtil.drawEventBarChart(widget._eventInfo.apneaCounts, PdfColors.blue200)
+                child: PdfUtils.drawEventBarChart( _apneaCounts, PdfColors.blue200, 3)
               ),
               //불규칙한 심장박동
               pw.Positioned(
                   left:100,
                   top: 372,
-                  child: ChartUtil.drawEventBarChart(widget._eventInfo.arrhythmiaCounts, PdfColors.red)
+                  child: PdfUtils.drawEventBarChart( _arrhythmiaCounts, PdfColors.red, 15)
               ),
               //뒤척임
               pw.Positioned(
                   left:100,
                   top: 430,
-                  child: ChartUtil.drawEventBarChart(widget._eventInfo.arrhythmia2Counts, PdfColors.blue700)
+                  child: PdfUtils.drawEventBarChart( _motionCounts, PdfColors.blue700, 15)
               ),
               //endregion
 
@@ -222,45 +296,45 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                 left:100,
                 top: 550,
-                child: ChartUtil.drawTimeLine()
+                child: PdfUtils.drawTimeLine()
               ),
               pw.Positioned(
                   left:100,
-                  top: 542,
-                  child: ChartUtil.drawTrendLineChart(widget._trendInfo.breathCounts, 10, 30, 10, 20)
+                  top: 540,
+                  child: PdfUtils.drawTrendLineChart( _breathCounts, 10, 30, 10, 20)
               ),
               //산소포화도
               pw.Positioned(
                   left:100,
                   top: 596,
-                  child: ChartUtil.drawTimeLine()
+                  child: PdfUtils.drawTimeLine()
               ),
               pw.Positioned(
                   left:100,
                   top: 576,
-                  child: ChartUtil.drawTrendLineChart(widget._trendInfo.oxygenCounts, 90, 100, 0, 10)
+                  child: PdfUtils.drawTrendLineChart( _spo2Counts, 90, 100, 0, 10)
               ),
               //심박수
               pw.Positioned(
                   left:100,
                   top: 640,
-                  child: ChartUtil.drawTimeLine()
+                  child: PdfUtils.drawTimeLine()
               ),
               pw.Positioned(
                   left:100,
-                  top: 640,
-                  child: ChartUtil.drawTrendLineChart(widget._trendInfo.heartrateCounts, 50, 200, 10, 28)
+                  top: 630,
+                  child: PdfUtils.drawTrendLineChart( _heartRateCounts, 50, 200, 10, 28)
               ),
               //체온
               pw.Positioned(
                   left:100,
                   top: 686,
-                  child: ChartUtil.drawTimeLine()
+                  child: PdfUtils.drawTimeLine()
               ),
               pw.Positioned(
                   left:100,
-                  top: 680,
-                  child: ChartUtil.drawTrendLineChart(widget._trendInfo.temperatureCounts, 350, 400, 0, 50)
+                  top: 678,
+                  child: PdfUtils.drawTrendLineChart( _temperatureCounts, 35.0, 40.0, 0, 50)
               ),
               //endregion
 
@@ -268,7 +342,7 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                 left: 370,
                 top: 100,
-                child: ChartUtil.defaultText(pw.Alignment.topLeft, widget._sleepReview.point, 12, pw.FontWeight.bold, font, 0)
+                child: PdfUtils.defaultText(pw.Alignment.topLeft,  _sleepReview.point, 12, pw.FontWeight.bold, font, 0)
               ),
               //endregion
 
@@ -276,27 +350,27 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                 left: 440,
                 top: 224,
-                child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._sleepReview.sleepTime, 7, pw.FontWeight.bold, font, 0)
+                child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _sleepReview.sleepTime, 7, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 456,
                   top: 240,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._sleepReview.toSleepTime, 7, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _sleepReview.toSleepTime, 7, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 456,
                   top: 252,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._sleepReview.arrhythmiaCount, 7, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _sleepReview.arrhythmiaCount, 7, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 456,
                   top: 266,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._sleepReview.apneaCount, 7, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _sleepReview.apneaCount, 7, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 456,
                   top: 282,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._sleepReview.arrhythmia2Count, 7, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _sleepReview.arrhythmia2Count, 7, pw.FontWeight.bold, font, 0)
               ),
               //endregion
 
@@ -306,22 +380,22 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                   left: 450,
                   top: 324,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._bioEstimate.breathCount, 5, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _bioEstimate.breathCount, 5, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                 left: 334,
                 top:356,
-                child: ChartUtil.drawTrendMinimalLineChart(widget._trendInfo.breathCounts, 10, 30, 10, 20, 25, 10, false)
+                child: PdfUtils.drawTrendMinimalLineChart( _breathCounts, 10, 30, 10, 20, 25, 10, false)
               ),
               pw.Positioned(
                   left: 456,
                   top: 382,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._bioEstimate.breathUp, 5, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _bioEstimate.breathUp, 5, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 456,
                   top: 390,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._bioEstimate.breathDown, 5, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _bioEstimate.breathDown, 5, pw.FontWeight.bold, font, 0)
               ),
               //endregion
 
@@ -329,17 +403,17 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                   left: 450,
                   top: 410,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._bioEstimate.oxygenRate, 5, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _bioEstimate.oxygenRate, 5, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 334,
                   top:440,
-                  child: ChartUtil.drawTrendMinimalLineChart(widget._trendInfo.oxygenCounts, 90, 100, 0, 10, 100, 94, true)
+                  child: PdfUtils.drawTrendMinimalLineChart( _spo2Counts, 90, 100, 0, 10, 100, 94, true)
               ),
               pw.Positioned(
                   left: 454,
                   top: 473,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._bioEstimate.oxygenDown, 5, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _bioEstimate.oxygenDown, 5, pw.FontWeight.bold, font, 0)
               ),
               //endregion
 
@@ -347,22 +421,22 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                   left: 450,
                   top: 494,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._bioEstimate.heartRateCount, 5, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _bioEstimate.heartRateCount, 5, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 334,
                   top:528,
-                  child: ChartUtil.drawTrendMinimalLineChart(widget._trendInfo.heartrateCounts, 50, 200, 10, 28, 100, 60, false)
+                  child: PdfUtils.drawTrendMinimalLineChart( _heartRateCounts, 50, 200, 10, 28, 100, 60, false)
               ),
               pw.Positioned(
                   left: 454,
                   top: 548,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._bioEstimate.heartRateUp, 5, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _bioEstimate.heartRateUp, 5, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 454,
                   top: 556,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._bioEstimate.heartRateDown, 5, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _bioEstimate.heartRateDown, 5, pw.FontWeight.bold, font, 0)
               ),
               //endregion
 
@@ -370,22 +444,22 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                   left: 450,
                   top: 575,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._bioEstimate.temperature, 5, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _bioEstimate.temperature, 5, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 334,
                   top:608,
-                  child: ChartUtil.drawTrendMinimalLineChart(widget._trendInfo.temperatureCounts, 350, 400, 0, 50, 375, 365, false)
+                  child: PdfUtils.drawTrendMinimalLineChart( _temperatureCounts, 350, 400, 0, 50, 375, 365, false)
               ),
               pw.Positioned(
                   left: 454,
                   top: 630,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._bioEstimate.temperatureUp, 5, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _bioEstimate.temperatureUp, 5, pw.FontWeight.bold, font, 0)
               ),
               pw.Positioned(
                   left: 454,
                   top: 638,
-                  child: ChartUtil.defaultText(pw.Alignment.centerLeft, widget._bioEstimate.temperatureDown, 5, pw.FontWeight.bold, font, 0)
+                  child: PdfUtils.defaultText(pw.Alignment.centerLeft,  _bioEstimate.temperatureDown, 5, pw.FontWeight.bold, font, 0)
               ),
               //endregion
 

@@ -22,54 +22,56 @@ class DateTimeCount {
 class EventInfo {
   List<DateTimeCount> apneaCounts;
   List<DateTimeCount> arrhythmiaCounts;
-  List<DateTimeCount> arrhythmia2Counts;
+  List<DateTimeCount> motionCounts;
 
-  EventInfo(this.apneaCounts, this.arrhythmiaCounts, this.arrhythmia2Counts);
+  EventInfo(this.apneaCounts, this.arrhythmiaCounts, this.motionCounts);
 }
 
 class TrendInfo {
   List<DateTimeCount> breathCounts;
-  List<DateTimeCount> oxygenCounts;
-  List<DateTimeCount> heartrateCounts;
+  List<DateTimeCount> spo2Counts;
+  List<DateTimeCount> heartRateCounts;
   List<DateTimeCount> temperatureCounts;
 
-  TrendInfo(this.breathCounts, this.oxygenCounts, this.heartrateCounts, this.temperatureCounts);
+  TrendInfo(this.breathCounts, this.spo2Counts, this.heartRateCounts, this.temperatureCounts);
 }
 
-class ChartSleepStage {
+
+class PdfSleepStage {
+  final int type;
+  final DateTime date;
+  final PdfColor? color;
+  PdfSleepStage(this.type, this.date, this.color);
+}
+
+class PdfSleepInfo {
   final String sleepTime;
   final String startSleepTime;
   final String endSleepTime;
 
-  final List<ChartStage> stages;
-  final List<ChartStageTable> tables;
+  final List<PdfSleepStage> stages;
+  final List<PdfSleepStageTable> tables;
 
-  ChartSleepStage(this.sleepTime, this.startSleepTime, this.endSleepTime, this.stages, this.tables);
+  PdfSleepInfo(this.sleepTime, this.startSleepTime, this.endSleepTime,
+      this.stages, this.tables);
 }
 
-class ChartStage {
-  final String type;
-  final DateTime date;
-
-  ChartStage(this.type, this.date);
-}
-
-class ChartStageTable {
+class PdfSleepStageTable {
   final String title;
   final double count;
   final String time;
   final PdfColor color;
 
-  ChartStageTable(this.title, this.count, this.time, this.color);
+  PdfSleepStageTable(this.title, this.count, this.time, this.color);
 }
 
-class ChartMember {
+class PdfUserInfo {
   final String name;
   final String gender;
   final String birth;
   final String date;
 
-  ChartMember(this.name, this.gender, this.birth, this.date);
+  PdfUserInfo(this.name, this.gender, this.birth, this.date);
 }
 
 class ValuePoint {
