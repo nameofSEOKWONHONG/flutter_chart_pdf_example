@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:flu_example/menus/pdfUtils.dart';
 import 'package:pdf/pdf.dart';
 
 import 'chart_model.dart';
@@ -26,16 +27,16 @@ class PdfDataConverter {
           if(types.add(item.type) && times.add(currentTime)) {
             PdfColor color = PdfColors.red;
             if(item.type == 0) {
-              color = PdfColors.orange;
+              color = PdfColor.fromHex("FF8A73");
             }
             else if(item.type == 1) {
-              color = PdfColors.blueGrey200;
+              color = PdfColor.fromHex("A1D4EB");
             }
             else if(item.type == 2) {
-              color = PdfColors.blue;
+              color = PdfColor.fromHex("3478F6");
             }
             else if(item.type == 3) {
-              color = PdfColors.purple;
+              color = PdfColor.fromHex("6946CD");
             }
             var addItem = PdfSleepStage(item.type, currentTime, color);
             result.add(addItem);
@@ -76,24 +77,26 @@ class PdfDataConverter {
 
     int totalLength = type0.length + type1.length + type2.length + type3.length;
     double calculatePercentage(int length, int total) {
-      return total > 0 ? (length / total) * 100 : 0.0;
+      if (total <= 0) return 0.0;
+      double percentage = (length / total) * 100;
+      return percentage > 100 ? 100.0 : percentage;
     }
-    result.add(PdfSleepStageTable("비수면",
+    result.add(PdfSleepStageTable("Non-sleep",
         calculatePercentage(type0.length, totalLength),
-        _formatMinutesToHoursAndMinutes(type0.length * 10),
-        PdfColors.orange));
-    result.add(PdfSleepStageTable("램(REM) 수면",
+        PdfUtils.formatMinutesToHoursAndMinutes(type0.length * 10),
+        PdfColor.fromHex("FF8A73")));
+    result.add(PdfSleepStageTable("REM sleep",
         calculatePercentage(type1.length, totalLength),
-        _formatMinutesToHoursAndMinutes(type1.length * 10),
-        PdfColors.blueGrey200));
-    result.add(PdfSleepStageTable("얕은 수면",
+        PdfUtils.formatMinutesToHoursAndMinutes(type1.length * 10),
+        PdfColor.fromHex("A1D4EB")));
+    result.add(PdfSleepStageTable("Light sleep",
         calculatePercentage(type2.length, totalLength),
-        _formatMinutesToHoursAndMinutes(type2.length * 10),
-        PdfColors.blue));
-    result.add(PdfSleepStageTable("깊은 수면",
-        calculatePercentage(type2.length, totalLength),
-        _formatMinutesToHoursAndMinutes(type3.length * 10),
-        PdfColors.purple));
+        PdfUtils.formatMinutesToHoursAndMinutes(type2.length * 10),
+        PdfColor.fromHex("3478F6")));
+    result.add(PdfSleepStageTable("Deep sleep",
+        calculatePercentage(type3.length, totalLength),
+        PdfUtils.formatMinutesToHoursAndMinutes(type3.length * 10),
+        PdfColor.fromHex("6946CD")));
 
     return result;
   }
@@ -120,11 +123,11 @@ class PdfDataConverter {
       }
     }
 
-    int totalLength = type0.length + type1.length + type2.length + type3.length;
-    result["totalSleepTime"] = _formatMinutesToHoursAndMinutes(totalLength * 10);
+    int totalLength = type1.length + type2.length + type3.length;
+    result["totalSleepTime"] = PdfUtils.formatMinutesToHoursAndMinutes(totalLength * 10);
     result["sleepTime"] = "${type1.first.date.hour.toString().padLeft(2, '0')}:${type1.first.date.minute.toString().padLeft(2, '0')}";
     result["wakeTime"] = "${type0.last.date.hour.toString().padLeft(2, '0')}:${type0.last.date.minute.toString().padLeft(2, '0')}";
-    result["sleepInterval"] = "${type1[0].date.difference(type0[0].date).inMinutes}분";
+    result["sleepInterval"] = "${type1[0].date.difference(type0[0].date).inMinutes}m";
 
     return result;
   }
@@ -229,14 +232,5 @@ class PdfDataConverter {
     return result;
   }
 
-  String _formatMinutesToHoursAndMinutes(int totalMinutes) {
-    int hours = totalMinutes ~/ 60; // 몫을 이용해 시간을 계산
-    int minutes = totalMinutes % 60; // 나머지를 이용해 분을 계산
 
-    if(hours <= 0) {
-      return "${minutes.toString().padLeft(2, '0')}분";
-    }
-
-    return '${hours}시간 ${minutes.toString().padLeft(2, '0')}분';
-  }
 }

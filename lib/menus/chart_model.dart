@@ -69,9 +69,8 @@ class PdfUserInfo {
   final String name;
   final String gender;
   final String birth;
-  final String date;
 
-  PdfUserInfo(this.name, this.gender, this.birth, this.date);
+  PdfUserInfo(this.name, this.gender, this.birth);
 }
 
 class ValuePoint {

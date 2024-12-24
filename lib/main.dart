@@ -5,12 +5,7 @@ import 'package:flu_example/menus/demochart.dart';
 import 'package:flu_example/menus/linechart.dart';
 import 'package:flu_example/menus/model.dart';
 import 'package:flutter/material.dart';
-import 'package:pdf/pdf.dart';
-import 'package:collection/collection.dart';
-
-
 import 'menus/chart_model.dart';
-import 'menus/pdfDataConverter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,9 +30,9 @@ class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //사용자 정보
-    var user = PdfUserInfo("이지은", "여성", "1990.03.12", "2024년 9월 24일 오후 10시 ~ 9월 24일 오전 6시");
-    DateTime start = DateTime(2024, 12, 30, 22, 21, 00);
-    DateTime end = DateTime(2024, 12, 31, 07, 30, 00);
+    var user = PdfUserInfo("이지은", "female", "19900312");
+    DateTime start = DateTime(2024, 12, 31, 00, 21, 00);
+    DateTime end = DateTime(2024, 12, 31, 09, 00, 00);
 
     List<Stage> getTempStage() {
       List<Stage> items = [];
