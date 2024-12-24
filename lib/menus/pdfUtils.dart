@@ -1,11 +1,7 @@
 import 'dart:math';
-
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-
 import 'chart_model.dart';
-
-
 
 class PdfUtils {
   static pw.CustomPaint drawTimeLine() {
@@ -242,6 +238,7 @@ class PdfUtils {
         painter: (canvas, point) {
           double x1 = 10;
 
+          //22시부터 익일 09시까지 시간
           var d1 = 0;
           if(items[0].date.day - items[items.length - 1].date.day == 0) {
             d1 = 1;
@@ -262,11 +259,12 @@ class PdfUtils {
               0,
               0
           ); // 종료 시간
-          Duration interval = const Duration(minutes: 10);           // 10분 간격
-
+          Duration interval = const Duration(minutes: 60);           // 10분 간격
           DateTime currentTime = startTime;
 
+          //라인 포인트 리스트
           List<ValuePoint> points = [];
+          var xInterval = 18;
           while (currentTime.isBefore(endTime) || currentTime.isAtSameMomentAs(endTime)) {
             var item = items.where((m) => m.date == currentTime).firstOrNull;
             if(item != null) {
@@ -275,7 +273,7 @@ class PdfUtils {
               points.add(ValuePoint(x1, y, item.count));
             }
 
-            x1 = x1+3;
+            x1 = x1+xInterval;
 
             currentTime = currentTime.add(interval);  // 10분 추가
           }
@@ -316,20 +314,24 @@ class PdfUtils {
     );
   }
 
-  static pw.CustomPaint drawTrendMinimalLineChart(List<DateTimeCount> items, double yMin, double yMax, double rangeMin, double rangeMax, double limitValue1, double limitValue2, bool isOxygen) {
+  static pw.CustomPaint drawTrendMinimalLineChart(List<DateTimeCount> items, double yMin, double yMax, double rangeMin, double rangeMax, double limitValue1, double limitValue2, bool isSpo2) {
     return pw.CustomPaint(
         size: const PdfPoint(0, 0),
         painter: (canvas, point) {
           double x1 = 10;
 
+          var d1 = 0;
+          if(items[0].date.day - items[items.length - 1].date.day == 0) {
+            d1 = 1;
+          }
           DateTime startTime = DateTime(
               items[0].date.year,
               items[0].date.month,
-              items[0].date.day,
+              items[0].date.day - d1,
               22,
               0,
               0
-          ); // 시작 시간
+          );
           DateTime endTime = DateTime(
               items[items.length - 1].date.year,
               items[items.length - 1].date.month,
@@ -338,11 +340,11 @@ class PdfUtils {
               0,
               0
           );
-          Duration interval = const Duration(minutes: 10);           // 10분 간격
+          Duration interval = const Duration(minutes: 10);
 
           DateTime currentTime = startTime;
 
-          if(isOxygen) {
+          if(isSpo2) {
             var minY = normalizeY(limitValue2, yMin, yMax, rangeMin, rangeMax);
             canvas
               ..setColor(PdfColors.blue)
@@ -367,23 +369,20 @@ class PdfUtils {
 
 
           List<ValuePoint> points = [];
+          var xInterval = 2;
           while (currentTime.isBefore(endTime) || currentTime.isAtSameMomentAs(endTime)) {
             if(currentTime.minute == 0 &&
                 currentTime.second == 0) {
-              //var y = getRandomNumber(10, 28).toDouble();
-              //var n = normalizeY(y, 10, 30, 10, 28);
-
               var item = items.where((m) => m.date == currentTime).firstOrNull;
               if(item != null) {
                 var y = normalizeY(item.count, yMin, yMax, rangeMin, rangeMax);
-                //var y = normalizeY(item.count, 10, 30, 10, 20);
                 points.add(ValuePoint(x1, y, item.count));
               }
             }
 
-            x1 = x1+2;
+            x1 = x1+xInterval;
 
-            currentTime = currentTime.add(interval);  // 10분 추가
+            currentTime = currentTime.add(interval);
           }
 
           for(int i=0; i<points.length; i++) {

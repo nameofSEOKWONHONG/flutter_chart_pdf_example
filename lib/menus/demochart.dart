@@ -1,3 +1,4 @@
+import 'package:darq/darq.dart';
 import 'package:flu_example/menus/model.dart';
 import 'package:flu_example/menus/pdfDataConverter.dart';
 import 'package:flu_example/menus/pdfUtils.dart';
@@ -46,7 +47,7 @@ class _DemoChartState extends State<DemoChart> {
 
   Future<pw.Font> loadKoreanFont() async {
     // 폰트 파일 로드
-    final fontData = await rootBundle.load('assets/NanumGothic.ttf');
+    final fontData = await rootBundle.load('assets/fonts/NanumGothic.ttf');
     return pw.Font.ttf(fontData);
   }
 
@@ -70,9 +71,6 @@ class _DemoChartState extends State<DemoChart> {
     _heartRateCounts = converter.trendDataToDateTimeCount(sd, ed, widget.trendDatum, 2);
     _temperatureCounts = converter.trendDataToDateTimeCount(sd, ed, widget.trendDatum, 3);
 
-    var event = EventInfo(_apneaCounts, _arrhythmiaCounts, _motionCounts);
-    var trend = TrendInfo(_breathCounts, _spo2Counts, _heartRateCounts, _temperatureCounts);
-
     var point = 100 - _apneaCounts.length;
     var motionCount = 0;
     for(var item in _motionCounts) {
@@ -89,17 +87,31 @@ class _DemoChartState extends State<DemoChart> {
         "${_arrhythmiaCounts.length}회",
         "${apneaCount}회",
         "${motionCount}회");
-    _bioEstimate = BioEstimate("평균 16회/분"
-        , "2건 발생"
-        , "2건 발생"
-        , "평균 98%"
-        , "2건 발생"
-        , "평균 92bpm"
-        , "2건 발생"
-        , "2건 발생"
-        , "평균 36.5℃"
-        , "1건 발생"
-        , "1건 발생");
+
+    var rrAvg = _breathCounts.average((m) => m.count);
+    var rrUp = _breathCounts.where((m) => m.count > 25).toList();
+    var rrDown = _breathCounts.where((m) => m.count < 10).toList();
+    var spo2Avg = _spo2Counts.average((m) => m.count);
+    var spo2Down = _spo2Counts.where((m) => m.count < 94).toList();
+    var hrAvg = _heartRateCounts.average((m) => m.count);
+    var hrUp = _heartRateCounts.where((m) => m.count > 100).toList();
+    var hrDown = _heartRateCounts.where((m) => m.count < 60).toList();
+    var tempAvg = _temperatureCounts.average((m) => m.count);
+    var tempUp = _temperatureCounts.where((m) => m.count > 37.5).toList();
+    var tempDown = _temperatureCounts.where((m) => m.count < 36.5).toList();
+
+    _bioEstimate = BioEstimate(
+        "평균 ${rrAvg.toStringAsFixed(0)}회/분"
+        , "${rrUp.length}건 발생"
+        , "${rrDown.length}건 발생"
+        , "평균 ${spo2Avg.toStringAsFixed(1)}%"
+        , "${spo2Down.length}건 발생"
+        , "평균 ${hrAvg.toStringAsFixed(1)}bpm"
+        , "${hrUp.length}건 발생"
+        , "${hrDown.length}건 발생"
+        , "평균 ${tempAvg.toStringAsFixed(1)}℃"
+        , "${tempUp.length}건 발생"
+        , "${tempDown.length}건 발생");
   }
 
   @override
@@ -119,7 +131,7 @@ class _DemoChartState extends State<DemoChart> {
     final doc = pw.Document();
     final font = await loadKoreanFont();
 
-    final svgString = await rootBundle.loadString('assets/report.svg');
+    final svgString = await rootBundle.loadString('assets/images/report.svg');
 
     doc.addPage(
       pw.Page(
@@ -449,7 +461,7 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                   left: 334,
                   top:608,
-                  child: PdfUtils.drawTrendMinimalLineChart( _temperatureCounts, 350, 400, 0, 50, 375, 365, false)
+                  child: PdfUtils.drawTrendMinimalLineChart( _temperatureCounts, 35, 40, 0, 50, 37.5, 36.5, false)
               ),
               pw.Positioned(
                   left: 454,

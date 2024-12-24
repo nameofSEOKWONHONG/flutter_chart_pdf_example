@@ -36,13 +36,11 @@ class MainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     //사용자 정보
     var user = PdfUserInfo("이지은", "여성", "1990.03.12", "2024년 9월 24일 오후 10시 ~ 9월 24일 오전 6시");
-    DateTime start = DateTime(2024, 12, 30, 22, 00, 00);
-    DateTime end = DateTime(2024, 12, 31, 09, 00, 00);
+    DateTime start = DateTime(2024, 12, 30, 22, 21, 00);
+    DateTime end = DateTime(2024, 12, 31, 07, 30, 00);
 
     List<Stage> getTempStage() {
       List<Stage> items = [];
-      DateTime start = DateTime(2024, 12, 30, 23, 00, 00);
-      DateTime end = DateTime(2024, 12, 31, 07, 00, 00);
       Duration interval = const Duration(seconds: 330);
       DateTime currentTime = start;
 
@@ -63,8 +61,6 @@ class MainPage extends StatelessWidget {
     }
     List<Apnea> getTempApnea() {
       List<Apnea> items = [];
-      DateTime start = DateTime(2024, 12, 30, 23, 00, 00);
-      DateTime end = DateTime(2024, 12, 31, 07, 00, 00);
       Duration interval = const Duration(seconds: 180);
       DateTime currentTime = start;
 
@@ -81,9 +77,6 @@ class MainPage extends StatelessWidget {
     }
     List<Arrhythmia> getTempArrhythmia(){
       List<Arrhythmia> result = [];
-
-      DateTime start = DateTime(2024, 12, 31, 00, 00, 00);
-      DateTime end = DateTime(2024, 12, 31, 07, 00, 00);
       Duration interval = const Duration(seconds: 10);
       DateTime currentTime = start;
 
@@ -101,8 +94,6 @@ class MainPage extends StatelessWidget {
     List<ArrhythmiaBeat> getTempArrhythmiaBeat(){
       List<ArrhythmiaBeat> result = [];
 
-      DateTime start = DateTime(2024, 12, 31, 00, 00, 00);
-      DateTime end = DateTime(2024, 12, 31, 07, 00, 00);
       Duration interval = const Duration(seconds: 10);
       DateTime currentTime = start;
 
@@ -120,8 +111,6 @@ class MainPage extends StatelessWidget {
     List<Motion> getTempMotion(){
       List<Motion> result = [];
 
-      DateTime start = DateTime(2024, 12, 31, 00, 00, 00);
-      DateTime end = DateTime(2024, 12, 31, 07, 00, 00);
       Duration interval = const Duration(seconds: 180);
       DateTime currentTime = start;
 
@@ -139,8 +128,6 @@ class MainPage extends StatelessWidget {
     List<TrendData> getTempTrendData(){
       List<TrendData> result = [];
 
-      DateTime start = DateTime(2024, 12, 31, 00, 00, 00);
-      DateTime end = DateTime(2024, 12, 31, 07, 00, 00);
       Duration interval = const Duration(minutes: 10);
       DateTime currentTime = start;
 
@@ -152,7 +139,7 @@ class MainPage extends StatelessWidget {
             rrAvg:PdfUtils.getRandomNumber(15, 24).toDouble(),
             spo2Avg: PdfUtils.getRandomDouble(98.0, 99.9),
             hrAvg:  PdfUtils.getRandomNumber(55, 94).toDouble(),
-            tempAvg: PdfUtils.getRandomDouble(36.1, 37.5));
+            tempAvg: PdfUtils.getRandomDouble(36.1, 37.6));
 
         result.add(item);
 
@@ -231,6 +218,7 @@ class MainPage extends StatelessWidget {
     );
   }
 }
+
 
 class DetailPage extends StatelessWidget {
   final int pageNumber;
