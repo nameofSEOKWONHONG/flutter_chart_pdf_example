@@ -1,7 +1,7 @@
 import 'package:darq/darq.dart';
-import 'package:flu_example/menus/model.dart';
-import 'package:flu_example/menus/pdfDataConverter.dart';
-import 'package:flu_example/menus/pdfUtils.dart';
+import 'package:flu_example/menus/pdf/model.dart';
+import 'package:flu_example/menus/pdf/pdf.converter.dart';
+import 'package:flu_example/menus/pdf/pdfUtils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
@@ -10,7 +10,7 @@ import 'package:printing/printing.dart';
 
 import 'chart_model.dart';
 
-class DemoChart extends StatefulWidget {
+class SleepDailyReport extends StatefulWidget {
   DateTime start;
   DateTime end;
   PdfUserInfo user;
@@ -21,18 +21,18 @@ class DemoChart extends StatefulWidget {
   List<Motion> motions;
   List<TrendData> trendDatum;
 
-  DemoChart(this.start, this.end, this.user, this.stages,
+  SleepDailyReport(this.start, this.end, this.user, this.stages,
     this.apneas, this.arrhythmias, this.arrhythmiaBeats, this.motions,
       this.trendDatum,
       {super.key});
 
   @override
-  State<DemoChart> createState() {
-    return _DemoChartState();
+  State<SleepDailyReport> createState() {
+    return _SleepDailyReportState();
   }
 }
 
-class _DemoChartState extends State<DemoChart> {
+class _SleepDailyReportState extends State<SleepDailyReport> {
   late String _gender;
   late String _birthDate;
   late String _estimateDate;
@@ -296,15 +296,30 @@ class _DemoChartState extends State<DemoChart> {
               //region [이벤트 발생 정보]
               //무호흡
               pw.Positioned(
+                  left:100,
+                  top: 364,
+                  child: PdfUtils.drawTimeLine()
+              ),
+              pw.Positioned(
                 left:100,
                 top: 315,
                 child: PdfUtils.drawEventBarChart( _apneaCounts, PdfColors.blue200, 3)
+              ),
+              pw.Positioned(
+                  left:100,
+                  top: 420,
+                  child: PdfUtils.drawTimeLine()
               ),
               //불규칙한 심장박동
               pw.Positioned(
                   left:100,
                   top: 372,
                   child: PdfUtils.drawEventBarChart( _arrhythmiaCounts, PdfColors.red, 15)
+              ),
+              pw.Positioned(
+                  left:100,
+                  top: 476,
+                  child: PdfUtils.drawTimeLine()
               ),
               //뒤척임
               pw.Positioned(
@@ -324,7 +339,7 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                   left:100,
                   top: 540,
-                  child: PdfUtils.drawTrendLineChart( _breathCounts, 10, 30, 10, 20)
+                  child: PdfUtils.drawTrendLineChart( _breathCounts, 10, 30, 10, 20, false)
               ),
               //산소포화도
               pw.Positioned(
@@ -335,7 +350,7 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                   left:100,
                   top: 576,
-                  child: PdfUtils.drawTrendLineChart( _spo2Counts, 90, 100, 0, 10)
+                  child: PdfUtils.drawTrendLineChart( _spo2Counts, 0, 100, 0, 10, false)
               ),
               //심박수
               pw.Positioned(
@@ -346,7 +361,7 @@ class _DemoChartState extends State<DemoChart> {
               pw.Positioned(
                   left:100,
                   top: 630,
-                  child: PdfUtils.drawTrendLineChart( _heartRateCounts, 50, 200, 10, 28)
+                  child: PdfUtils.drawTrendLineChart( _heartRateCounts, 50, 200, 10, 28, false)
               ),
               //체온
               pw.Positioned(
@@ -356,8 +371,8 @@ class _DemoChartState extends State<DemoChart> {
               ),
               pw.Positioned(
                   left:100,
-                  top: 678,
-                  child: PdfUtils.drawTrendLineChart( _temperatureCounts, 35.0, 40.0, 0, 50)
+                  top: 674,
+                  child: PdfUtils.drawTrendLineChart(_temperatureCounts, 30, 40, 0, 30, true)
               ),
               //endregion
 
@@ -527,8 +542,8 @@ class _DemoChartState extends State<DemoChart> {
               ),
               pw.Positioned(
                   left: 334,
-                  top:608,
-                  child: PdfUtils.drawTrendMinimalLineChart( _temperatureCounts, 35, 40, 0, 50, 37.5, 36.5, false)
+                  top: 618,
+                  child: PdfUtils.drawTrendMinimalLineChart(_temperatureCounts, 30, 40, 0, 40, 37.5, 36.5, false)
               ),
 
               pw.Positioned(

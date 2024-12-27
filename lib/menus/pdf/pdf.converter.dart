@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:flu_example/menus/pdfUtils.dart';
+import 'package:flu_example/menus/pdf/pdfUtils.dart';
 import 'package:pdf/pdf.dart';
 
 import 'chart_model.dart';
@@ -9,6 +9,8 @@ import 'package:darq/darq.dart';
 
 class PdfDataConverter {
   List<PdfSleepStage> stageToPdfSleepStage(DateTime start, DateTime end, List<Stage> items) {
+    if(items.isEmpty) return [];
+
     List<PdfSleepStage> result = [];
     DateTime currentTime = start;
     Duration interval = const Duration(minutes: 10);
@@ -16,8 +18,10 @@ class PdfDataConverter {
     while (currentTime.isBefore(end) || currentTime.isAtSameMomentAs(end)) {
       var closest = items
           .where((item) =>
+      item.timestamp.isAtSameMomentAs(currentTime) ||
           item.timestamp.isAfter(currentTime) &&
-          item.timestamp.isBefore(currentTime.add(interval)))
+              (item.timestamp.isAtSameMomentAs(currentTime.add(interval)) ||
+                  item.timestamp.isBefore(currentTime.add(interval))))
           .toList();
 
       if (closest.count() > 0) {
@@ -54,6 +58,8 @@ class PdfDataConverter {
   }
 
   List<PdfSleepStageTable> stageToPdfSleepStageTable(List<PdfSleepStage> items) {
+    if(items.isEmpty) return [];
+
     List<PdfSleepStageTable> result = [];
 
     List<PdfSleepStage> type0 = [];
@@ -141,11 +147,15 @@ class PdfDataConverter {
     while (currentTime.isBefore(end) || currentTime.isAtSameMomentAs(end)) {
       var closest = items
           .where((item) =>
-            item.timestamp.isAfter(currentTime) &&
-            item.timestamp.isBefore(currentTime.add(interval))).toList();
+      item.timestamp.isAtSameMomentAs(currentTime) ||
+          item.timestamp.isAfter(currentTime) &&
+              (item.timestamp.isAtSameMomentAs(currentTime.add(interval)) ||
+                  item.timestamp.isBefore(currentTime.add(interval)))).toList();
 
-      result.add(DateTimeCount(closest.length.toDouble(), currentTime));
-      currentTime = currentTime.add(interval); // 10분 추가
+      if(closest.isNotEmpty) {
+        result.add(DateTimeCount(closest.length.toDouble(), currentTime));
+      }
+      currentTime = currentTime.add(interval);
     }
     return result;
   }
@@ -159,16 +169,20 @@ class PdfDataConverter {
     while (currentTime.isBefore(end) || currentTime.isAtSameMomentAs(end)) {
       var closest1 = items
           .where((item) =>
-      item.timestamp.isAfter(currentTime) &&
-          item.timestamp.isBefore(currentTime.add(interval))).toList();
+      item.timestamp.isAtSameMomentAs(currentTime) ||
+          item.timestamp.isAfter(currentTime) &&
+              (item.timestamp.isAtSameMomentAs(currentTime.add(interval)) ||
+                  item.timestamp.isBefore(currentTime.add(interval)))).toList();
 
       var closest2 = items2
           .where((item) =>
       item.timestamp.isAfter(currentTime) &&
           item.timestamp.isBefore(currentTime.add(interval))).toList();
 
-      result.add(DateTimeCount((closest1.length + closest2.length).toDouble(), currentTime));
-      currentTime = currentTime.add(interval); // 10분 추가
+      if(closest1.isNotEmpty || closest2.isNotEmpty) {
+        result.add(DateTimeCount((closest1.length + closest2.length).toDouble(), currentTime));
+      }
+      currentTime = currentTime.add(interval);
     }
     return result;
   }
@@ -182,16 +196,20 @@ class PdfDataConverter {
     while (currentTime.isBefore(end) || currentTime.isAtSameMomentAs(end)) {
       var closest = items
           .where((item) =>
-      item.timestamp.isAfter(currentTime) &&
-          item.timestamp.isBefore(currentTime.add(interval))).toList();
+      item.timestamp.isAtSameMomentAs(currentTime) ||
+          item.timestamp.isAfter(currentTime) &&
+              (item.timestamp.isAtSameMomentAs(currentTime.add(interval)) ||
+                  item.timestamp.isBefore(currentTime.add(interval)))).toList();
 
-      var count = 0;
-      for(Motion item in closest) {
-        count += item.type;
+      if(closest.isNotEmpty) {
+        var count = 0;
+        for(Motion item in closest) {
+          count += item.type;
+        }
+
+        result.add(DateTimeCount(count.toDouble(), currentTime));
       }
-
-      result.add(DateTimeCount(count.toDouble(), currentTime));
-      currentTime = currentTime.add(interval); // 10분 추가
+      currentTime = currentTime.add(interval);
     }
 
     return result;
@@ -206,9 +224,11 @@ class PdfDataConverter {
     while (currentTime.isBefore(end) || currentTime.isAtSameMomentAs(end)) {
       var closest = items
           .where((item) =>
+      item.date.isAtSameMomentAs(currentTime) ||
           item.date.isAfter(currentTime) &&
-          item.date.isBefore(currentTime.add(interval))).toList();
-      if(closest.count() > 0) {
+              (item.date.isAtSameMomentAs(currentTime.add(interval)) ||
+                  item.date.isBefore(currentTime.add(interval)))).toList();
+      if(closest.isNotEmpty) {
         double avg = 0;
 
         if(type == 0) {
@@ -222,6 +242,7 @@ class PdfDataConverter {
         }
         else if(type == 3) {
           avg = closest.average((m) => m.tempAvg!);
+          avg = PdfUtils.roundToDecimalPlace(avg, 1);
         }
 
         result.add(DateTimeCount(avg, currentTime));

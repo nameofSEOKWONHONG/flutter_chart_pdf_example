@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'package:flu_example/menus/pdfUtils.dart';
+import 'package:flu_example/menus/pdf/pdfUtils.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 

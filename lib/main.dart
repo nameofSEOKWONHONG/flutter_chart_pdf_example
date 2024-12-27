@@ -1,11 +1,11 @@
 import 'package:flu_example/menus/barchart.dart';
 import 'package:flu_example/menus/barchart2.dart';
-import 'package:flu_example/menus/pdfUtils.dart';
-import 'package:flu_example/menus/demochart.dart';
+import 'package:flu_example/menus/pdf/pdfUtils.dart';
 import 'package:flu_example/menus/linechart.dart';
-import 'package:flu_example/menus/model.dart';
+import 'package:flu_example/menus/pdf/model.dart';
+import 'package:flu_example/menus/pdf/sleepDailyReport.view.dart';
 import 'package:flutter/material.dart';
-import 'menus/chart_model.dart';
+import 'menus/pdf/chart_model.dart';
 
 void main() {
   runApp(const MyApp());
@@ -134,7 +134,7 @@ class MainPage extends StatelessWidget {
             rrAvg:PdfUtils.getRandomNumber(15, 24).toDouble(),
             spo2Avg: PdfUtils.getRandomDouble(98.0, 99.9),
             hrAvg:  PdfUtils.getRandomNumber(55, 94).toDouble(),
-            tempAvg: PdfUtils.getRandomDouble(36.1, 37.6));
+            tempAvg: PdfUtils.getRandomDouble(0, 0));
 
         result.add(item);
 
@@ -200,7 +200,7 @@ class MainPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => DemoChart(
+                  builder: (context) => SleepDailyReport(
                       start, end, user, stages, apneas, arrhythmias, arrhythmiaBeats, motions, trendDatum
                   ),
                 ),

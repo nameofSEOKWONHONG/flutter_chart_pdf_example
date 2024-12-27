@@ -78,6 +78,8 @@ class PdfUtils {
     return pw.CustomPaint(
         size: const PdfPoint(0, 0),
         painter: (canvas, point) {
+          if(items.isEmpty) return;
+
           var d1 = 0;
           if(items[0].date.day - items[items.length - 1].date.day == 0) {
             d1 = 1;
@@ -152,13 +154,25 @@ class PdfUtils {
           double y2 = 35;
 
           canvas
-            ..setStrokeColor(PdfColors.black)
+            ..setColor(PdfColors.grey)
             ..setLineWidth(0.1)
-            ..moveTo(x1, y1)
-            ..lineTo(x2, y1)
-            ..strokePath()
-          ;
+            ..drawLine(x1-30, y1 - 40, x2, y1 - 40)
+            ..strokePath();
 
+          canvas
+            ..setColor(PdfColors.grey)
+            ..setLineWidth(0.1)
+            ..drawLine(x1-30, y2 - 15.5, x2, y2 - 15.5)
+            ..strokePath();
+
+          canvas
+            ..setColor(PdfColors.black)
+            ..drawString(PdfFont.courier(PdfDocument()), 5, "0", -20, 5);
+          canvas
+            ..setColor(PdfColors.black)
+            ..drawString(PdfFont.courier(PdfDocument()), 5, ">=${maxValue}", -20, y2 - 10);
+
+          if(items.isEmpty) return;
 
           var d1 = 0;
           if(items[0].date.day - items[items.length - 1].date.day == 0) {
@@ -184,48 +198,20 @@ class PdfUtils {
 
           DateTime currentTime = startTime;
 
-          canvas
-            ..setColor(PdfColors.grey)
-            ..setLineWidth(0.1)
-            ..drawLine(x1-30, y1 - 40, x2, y1 - 40)
-            ..strokePath();
-
-          canvas
-            ..setColor(PdfColors.grey)
-            ..setLineWidth(0.1)
-            ..drawLine(x1-30, y2 - 15.5, x2, y2 - 15.5)
-            ..strokePath();
-
-          canvas
-            ..setColor(PdfColors.black)
-            ..drawString(PdfFont.courier(PdfDocument()), 5, "0", -20, 5);
-          canvas
-            ..setColor(PdfColors.black)
-            ..drawString(PdfFont.courier(PdfDocument()), 5, ">=${maxValue}", -20, y2 - 10);
-
           while (currentTime.isBefore(endTime) || currentTime.isAtSameMomentAs(endTime)) {
-            canvas
-              ..setColor(PdfColors.black)
-              ..setLineWidth(0.1)
-              ..drawLine(x1, y1, x1, y2)
-              ..strokePath();
-
-            if (currentTime.minute == 0) {
-              canvas.drawString(PdfFont.courier(PdfDocument()), 4, currentTime.hour.toString().padLeft(2, "0"), x1-2, y2 - 5);
-            }
-
-            var item = items.where((e) => e.date == currentTime).firstOrNull;
-            if(item != null) {
-              if(item.count > 0) {
-                double v = normalizeY(item.count, 0, maxValue.toDouble(), 0, 20);
-                canvas
-                  ..setColor(color)
-                  ..setLineWidth(1)
-                  ..drawLine(x1, (y1 - 40), x1, v)
-                  ..strokePath();
+            if(items.isNotEmpty) {
+              var item = items.where((e) => e.date == currentTime).firstOrNull;
+              if(item != null) {
+                if(item.count > 0) {
+                  double v = normalizeY(item.count, 0, maxValue.toDouble(), 0, 20);
+                  canvas
+                    ..setColor(color)
+                    ..setLineWidth(1)
+                    ..drawLine(x1, (y1 - 40), x1, v)
+                    ..strokePath();
+                }
               }
             }
-
             x1 = x1+3;
 
             currentTime = currentTime.add(interval);  // 10분 추가
@@ -234,10 +220,12 @@ class PdfUtils {
     );
   }
 
-  static pw.CustomPaint drawTrendLineChart(List<DateTimeCount> items, double yMin, double yMax, double rangeMin, double rangeMax) {
+  static pw.CustomPaint drawTrendLineChart(List<DateTimeCount> items, double yMin, double yMax, double rangeMin, double rangeMax, bool isPoint) {
     return pw.CustomPaint(
         size: const PdfPoint(0, 0),
         painter: (canvas, point) {
+          if(items.isEmpty) return;
+
           double x1 = 10;
 
           //22시부터 익일 09시까지 시간
@@ -246,12 +234,12 @@ class PdfUtils {
             d1 = 1;
           }
           DateTime startTime = DateTime(
-            items[0].date.year,
-            items[0].date.month,
-            items[0].date.day - d1,
-            22,
-            0,
-            0
+              items[0].date.year,
+              items[0].date.month,
+              items[0].date.day - d1,
+              22,
+              0,
+              0
           ); // 시작 시간
           DateTime endTime = DateTime(
               items[items.length - 1].date.year,
@@ -270,9 +258,11 @@ class PdfUtils {
           while (currentTime.isBefore(endTime) || currentTime.isAtSameMomentAs(endTime)) {
             var item = items.where((m) => m.date == currentTime).firstOrNull;
             if(item != null) {
-              var y = normalizeY(item.count, yMin, yMax, rangeMin, rangeMax);
-              //var y = normalizeY(item.count, 10, 30, 10, 20);
-              points.add(ValuePoint(x1, y, item.count));
+              if(item.count > 0) {
+                var y = normalizeY(item.count, yMin, yMax, rangeMin, rangeMax);
+                //var y = normalizeY(item.count, 10, 30, 10, 20);
+                points.add(ValuePoint(x1, y, item.count));
+              }
             }
 
             x1 = x1+xInterval;
@@ -284,9 +274,17 @@ class PdfUtils {
           for(int i=0; i<points.length; i++) {
             if(i == points.length - 1) {
               var point = points[i];
-              canvas
-                ..setColor(PdfColors.black)
-                ..drawString(font, 4, "${point.v.toInt()}", point.x - 2, point.y - 8);
+              if(isPoint) {
+                canvas
+                  ..setColor(PdfColors.black)
+                  ..drawString(font, 4, "${point.v.toStringAsFixed(1)}", point.x - 2, point.y - 8);
+              }
+              else {
+                canvas
+                  ..setColor(PdfColors.black)
+                  ..drawString(font, 4, "${point.v.toInt()}", point.x - 2, point.y - 8);
+              }
+
               canvas
                 ..setFillColor(PdfColors.blue)
                 ..setColor(PdfColors.blue)
@@ -298,9 +296,17 @@ class PdfUtils {
 
             var current = points[i];
             var next = points[i + 1];
-            canvas
-              ..setColor(PdfColors.black)
-              ..drawString(font, 4, "${current.v.toInt()}", current.x - 2, current.y -8);
+            if(isPoint) {
+              canvas
+                ..setColor(PdfColors.black)
+                ..drawString(font, 4, "${current.v.toStringAsFixed(1)}", current.x - 2, current.y -8);
+            }
+            else {
+              canvas
+                ..setColor(PdfColors.black)
+                ..drawString(font, 4, "${current.v.toInt()}", current.x - 2, current.y -8);
+            }
+
             canvas
               ..setFillColor(PdfColors.blue)
               ..setColor(PdfColors.blue)
@@ -318,65 +324,65 @@ class PdfUtils {
 
   static pw.CustomPaint drawPoint(double p, double yMin, double yMax, double rangeMin, double rangeMax) {
     return pw.CustomPaint(
-      size: const PdfPoint(0, 30),
-      painter: (canvas, point) {
-        double x1 = -24;
+        size: const PdfPoint(0, 30),
+        painter: (canvas, point) {
+          double x1 = -24;
 
-        var y = PdfUtils.normalizeY(p, yMin, yMax, rangeMin, rangeMax);
-        var color = "f9c871";
+          var y = PdfUtils.normalizeY(p, yMin, yMax, rangeMin, rangeMax);
+          var color = "f9c871";
 
-        PdfPoint rotatePoint(double x, double y, double cx, double cy, double angle) {
-          final double dx = x - cx;
-          final double dy = y - cy;
-          final double rotatedX = dx * cos(angle) - dy * sin(angle) + cx;
-          final double rotatedY = dx * sin(angle) + dy * cos(angle) + cy;
-          return PdfPoint(rotatedX, rotatedY);
+          PdfPoint rotatePoint(double x, double y, double cx, double cy, double angle) {
+            final double dx = x - cx;
+            final double dy = y - cy;
+            final double rotatedX = dx * cos(angle) - dy * sin(angle) + cx;
+            final double rotatedY = dx * sin(angle) + dy * cos(angle) + cy;
+            return PdfPoint(rotatedX, rotatedY);
+          }
+
+          // 사각형 원래 좌표
+          final double cx = 54; // 회전 중심 x좌표
+          final double cy = y - 0.5; // 회전 중심 y좌표
+          final double width = 10; // 사각형 너비
+          final double height = 10; // 사각형 높이
+          final double angle = 45 * pi / 180; // 회전 각도 (라디안 단위)
+
+          // 사각형 꼭짓점 계산
+          List<PdfPoint> points = [
+            rotatePoint(cx - width / 2, cy - height / 2, cx, cy, angle), // 왼쪽 상단
+            rotatePoint(cx + width / 2, cy - height / 2, cx, cy, angle), // 오른쪽 상단
+            rotatePoint(cx + width / 2, cy + height / 2, cx, cy, angle), // 오른쪽 하단
+            rotatePoint(cx - width / 2, cy + height / 2, cx, cy, angle), // 왼쪽 하단
+          ];
+
+          // 사각형 그리기
+          canvas
+            ..setFillColor(PdfColor.fromHex(color)) // 채우기 색상
+            ..moveTo(points[0].x, points[0].y)
+            ..lineTo(points[1].x, points[1].y)
+            ..lineTo(points[2].x, points[2].y)
+            ..lineTo(points[3].x, points[3].y)
+            ..closePath()
+            ..fillPath(); // 채우기
+
+          canvas
+            ..setColor(PdfColor.fromHex(color))
+            ..setLineWidth(1)
+            ..drawLine(x1, y-0.4, x1 + 78, y-0.4)
+            ..closePath()
+            ..strokePath();
+          canvas
+            ..setColor(PdfColor.fromHex(color))
+            ..setStrokeColor(PdfColor.fromHex(color))
+            ..setFillColor(PdfColor.fromHex(color))
+            ..drawRect(x1 + 78, y-6, 24, 11)
+            ..closePath()
+            ..fillPath();
+          canvas
+            ..setColor(PdfColors.black)
+            ..drawString(PdfFont.courier(PdfDocument()), 7, "Point", x1 + 82, y-4)
+            ..closePath()
+            ..strokePath();
         }
-
-        // 사각형 원래 좌표
-        final double cx = 54; // 회전 중심 x좌표
-        final double cy = y - 0.5; // 회전 중심 y좌표
-        final double width = 10; // 사각형 너비
-        final double height = 10; // 사각형 높이
-        final double angle = 45 * pi / 180; // 회전 각도 (라디안 단위)
-
-        // 사각형 꼭짓점 계산
-        List<PdfPoint> points = [
-          rotatePoint(cx - width / 2, cy - height / 2, cx, cy, angle), // 왼쪽 상단
-          rotatePoint(cx + width / 2, cy - height / 2, cx, cy, angle), // 오른쪽 상단
-          rotatePoint(cx + width / 2, cy + height / 2, cx, cy, angle), // 오른쪽 하단
-          rotatePoint(cx - width / 2, cy + height / 2, cx, cy, angle), // 왼쪽 하단
-        ];
-
-        // 사각형 그리기
-        canvas
-          ..setFillColor(PdfColor.fromHex(color)) // 채우기 색상
-          ..moveTo(points[0].x, points[0].y)
-          ..lineTo(points[1].x, points[1].y)
-          ..lineTo(points[2].x, points[2].y)
-          ..lineTo(points[3].x, points[3].y)
-          ..closePath()
-          ..fillPath(); // 채우기
-
-        canvas
-          ..setColor(PdfColor.fromHex(color))
-          ..setLineWidth(1)
-          ..drawLine(x1, y-0.4, x1 + 78, y-0.4)
-          ..closePath()
-          ..strokePath();
-        canvas
-          ..setColor(PdfColor.fromHex(color))
-          ..setStrokeColor(PdfColor.fromHex(color))
-          ..setFillColor(PdfColor.fromHex(color))
-          ..drawRect(x1 + 78, y-6, 24, 11)
-          ..closePath()
-          ..fillPath();
-        canvas
-          ..setColor(PdfColors.black)
-          ..drawString(PdfFont.courier(PdfDocument()), 7, "Point", x1 + 82, y-4)
-          ..closePath()
-          ..strokePath();
-      }
     );
   }
 
@@ -384,6 +390,8 @@ class PdfUtils {
     return pw.CustomPaint(
         size: const PdfPoint(0, 0),
         painter: (canvas, point) {
+          if(items.isEmpty) return;
+
           double x1 = 10;
 
           var d1 = 0;
@@ -441,8 +449,10 @@ class PdfUtils {
                 currentTime.second == 0) {
               var item = items.where((m) => m.date == currentTime).firstOrNull;
               if(item != null) {
-                var y = normalizeY(item.count, yMin, yMax, rangeMin, rangeMax);
-                points.add(ValuePoint(x1, y, item.count));
+                if(item.count > 0) {
+                  var y = normalizeY(item.count, yMin, yMax, rangeMin, rangeMax);
+                  points.add(ValuePoint(x1, y, item.count));
+                }
               }
             }
 
@@ -488,7 +498,12 @@ class PdfUtils {
   }
 
   static double normalizeY(double yInput, double yMin, double yMax, double rangeMin, double rangeMax) {
-    yInput = min(yInput, yMax);
+    if (yInput < yMin) {
+      yInput = yMin;
+    }
+    if (yInput > yMax) {
+      yInput = yMax;
+    }
     return ((yInput - yMin) / (yMax - yMin)) * (rangeMax - rangeMin) + rangeMin;
   }
 
@@ -499,7 +514,7 @@ class PdfUtils {
 
   static String formatDateTime(DateTime dateTime, bool isDateOnly) {
     // 날짜 포맷
-    String date = DateFormat('MMMM d, y').format(dateTime); // September 24, 2024
+    String date = DateFormat('MMMM d, y', "en_US").format(dateTime); // September 24, 2024
 
     if(isDateOnly) return date;
 
@@ -521,5 +536,9 @@ class PdfUtils {
 
     return '${hours}h ${minutes.toString().padLeft(2, '0')}m';
   }
-}
 
+  static double roundToDecimalPlace(double value, int places) {
+    double factor = 10;
+    return double.parse((value / factor).toStringAsFixed(places));
+  }
+}
