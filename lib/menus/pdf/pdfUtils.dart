@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'chart_model.dart';
 
 class PdfUtils {
-  static pw.CustomPaint drawTimeLine() {
+  static pw.CustomPaint drawTimeLine(PdfTtfFont font) {
     return pw.CustomPaint(
         size: const PdfPoint(0, 0),
         painter: (canvas, point) {
@@ -63,7 +64,7 @@ class PdfUtils {
               ..strokePath();
 
             if (currentTime.minute == 0) {
-              canvas.drawString(PdfFont.courier(PdfDocument()), 4, currentTime.hour.toString().padLeft(2, "0"), x1-3, y2 - 5);
+              canvas.drawString(font, 4, currentTime.hour.toString().padLeft(2, "0"), x1-3, y2 - 5);
             }
 
             x1 = x1+3;
@@ -144,7 +145,7 @@ class PdfUtils {
     );
   }
 
-  static pw.CustomPaint drawEventBarChart(List<DateTimeCount> items, PdfColor color, int maxValue) {
+  static pw.CustomPaint drawEventBarChart(PdfTtfFont font, List<DateTimeCount> items, PdfColor color, int maxValue) {
     return pw.CustomPaint(
         size: const PdfPoint(280, 50),
         painter: (canvas, point) {
@@ -167,10 +168,10 @@ class PdfUtils {
 
           canvas
             ..setColor(PdfColors.black)
-            ..drawString(PdfFont.courier(PdfDocument()), 5, "0", -20, 5);
+            ..drawString(font, 5, "0", -20, 5);
           canvas
             ..setColor(PdfColors.black)
-            ..drawString(PdfFont.courier(PdfDocument()), 5, ">=${maxValue}", -20, y2 - 10);
+            ..drawString(font, 5, ">=${maxValue}", -20, y2 - 10);
 
           if(items.isEmpty) return;
 
@@ -220,7 +221,7 @@ class PdfUtils {
     );
   }
 
-  static pw.CustomPaint drawTrendLineChart(List<DateTimeCount> items, double yMin, double yMax, double rangeMin, double rangeMax, bool isPoint) {
+  static pw.CustomPaint drawTrendLineChart(PdfTtfFont font, List<DateTimeCount> items, double yMin, double yMax, double rangeMin, double rangeMax, bool isPoint) {
     return pw.CustomPaint(
         size: const PdfPoint(0, 0),
         painter: (canvas, point) {
@@ -270,7 +271,6 @@ class PdfUtils {
             currentTime = currentTime.add(interval);  // 10분 추가
           }
 
-          var font = PdfFont.courier(PdfDocument());
           for(int i=0; i<points.length; i++) {
             if(i == points.length - 1) {
               var point = points[i];
@@ -379,7 +379,7 @@ class PdfUtils {
             ..fillPath();
           canvas
             ..setColor(PdfColors.black)
-            ..drawString(PdfFont.courier(PdfDocument()), 7, "Point", x1 + 82, y-4)
+            ..drawString(PdfFont.helvetica(PdfDocument()), 7, "Point", x1 + 82, y-4)
             ..closePath()
             ..strokePath();
         }

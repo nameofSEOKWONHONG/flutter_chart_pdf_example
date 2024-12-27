@@ -54,6 +54,11 @@ class _SleepDailyReportState extends State<SleepDailyReport> {
     return pw.Font.ttf(fontData);
   }
 
+  Future<PdfTtfFont> loadKoreanTtlFont(PdfDocument doc) async {
+    final fontData = await rootBundle.load('assets/fonts/NanumGothic.ttf');
+    return PdfTtfFont(doc, fontData);
+  }
+
   @override
   void initState() {
     DateTime sd = DateTime(widget.start.year, widget.start.month, widget.start.day, widget.start.hour, 00, 00);
@@ -141,6 +146,7 @@ class _SleepDailyReportState extends State<SleepDailyReport> {
   Future<Uint8List> _makePDF(PdfPageFormat format) async {
     final doc = pw.Document();
     final font = await loadKoreanFont();
+    final drawFont = await loadKoreanTtlFont(doc.document);
 
     final svgString = await rootBundle.loadString('assets/images/report.svg');
 
@@ -243,7 +249,7 @@ class _SleepDailyReportState extends State<SleepDailyReport> {
               pw.Positioned(
                 left:100,
                 top: 178,
-                child: PdfUtils.drawTimeLine()
+                child: PdfUtils.drawTimeLine(drawFont)
               ),
               pw.Positioned(
                 left:100,
@@ -298,34 +304,34 @@ class _SleepDailyReportState extends State<SleepDailyReport> {
               pw.Positioned(
                   left:100,
                   top: 364,
-                  child: PdfUtils.drawTimeLine()
+                  child: PdfUtils.drawTimeLine(drawFont)
               ),
               pw.Positioned(
                 left:100,
                 top: 315,
-                child: PdfUtils.drawEventBarChart( _apneaCounts, PdfColors.blue200, 3)
+                child: PdfUtils.drawEventBarChart(drawFont, _apneaCounts, PdfColors.blue200, 3)
               ),
               pw.Positioned(
                   left:100,
                   top: 420,
-                  child: PdfUtils.drawTimeLine()
+                  child: PdfUtils.drawTimeLine(drawFont)
               ),
               //불규칙한 심장박동
               pw.Positioned(
                   left:100,
                   top: 372,
-                  child: PdfUtils.drawEventBarChart( _arrhythmiaCounts, PdfColors.red, 15)
+                  child: PdfUtils.drawEventBarChart(drawFont, _arrhythmiaCounts, PdfColors.red, 15)
               ),
               pw.Positioned(
                   left:100,
                   top: 476,
-                  child: PdfUtils.drawTimeLine()
+                  child: PdfUtils.drawTimeLine(drawFont)
               ),
               //뒤척임
               pw.Positioned(
                   left:100,
                   top: 430,
-                  child: PdfUtils.drawEventBarChart( _motionCounts, PdfColors.blue700, 15)
+                  child: PdfUtils.drawEventBarChart(drawFont, _motionCounts, PdfColors.blue700, 15)
               ),
               //endregion
 
@@ -334,45 +340,45 @@ class _SleepDailyReportState extends State<SleepDailyReport> {
               pw.Positioned(
                 left:100,
                 top: 550,
-                child: PdfUtils.drawTimeLine()
+                child: PdfUtils.drawTimeLine(drawFont)
               ),
               pw.Positioned(
                   left:100,
                   top: 540,
-                  child: PdfUtils.drawTrendLineChart( _breathCounts, 10, 30, 10, 20, false)
+                  child: PdfUtils.drawTrendLineChart(drawFont, _breathCounts, 10, 30, 10, 20, false)
               ),
               //산소포화도
               pw.Positioned(
                   left:100,
                   top: 596,
-                  child: PdfUtils.drawTimeLine()
+                  child: PdfUtils.drawTimeLine(drawFont)
               ),
               pw.Positioned(
                   left:100,
                   top: 576,
-                  child: PdfUtils.drawTrendLineChart( _spo2Counts, 0, 100, 0, 10, false)
+                  child: PdfUtils.drawTrendLineChart(drawFont, _spo2Counts, 0, 100, 0, 10, false)
               ),
               //심박수
               pw.Positioned(
                   left:100,
                   top: 640,
-                  child: PdfUtils.drawTimeLine()
+                  child: PdfUtils.drawTimeLine(drawFont)
               ),
               pw.Positioned(
                   left:100,
                   top: 630,
-                  child: PdfUtils.drawTrendLineChart( _heartRateCounts, 50, 200, 10, 28, false)
+                  child: PdfUtils.drawTrendLineChart(drawFont, _heartRateCounts, 50, 200, 10, 28, false)
               ),
               //체온
               pw.Positioned(
                   left:100,
                   top: 686,
-                  child: PdfUtils.drawTimeLine()
+                  child: PdfUtils.drawTimeLine(drawFont)
               ),
               pw.Positioned(
                   left:100,
                   top: 674,
-                  child: PdfUtils.drawTrendLineChart(_temperatureCounts, 30, 40, 0, 30, true)
+                  child: PdfUtils.drawTrendLineChart(drawFont,_temperatureCounts, 30, 40, 0, 30, true)
               ),
               //endregion
 
